@@ -218,57 +218,7 @@ export const DocumentEditor: React.FC<Props> = ({
         }
       })
     ],
-    content: initialContent || `
-<h1>Project Proposal & Strategic Architecture</h1>
-<p>Welcome to <strong>Word AI Studio</strong> — your intelligent, Microsoft Word-grade document authoring environment paired with a real-time autonomous AI copilot.</p>
-
-<h2>1. Executive Summary</h2>
-<p>Modern documents require more than passive formatting: they demand deep contextual awareness, instant proofreading, data structuring, and rapid synthesis. By integrating LLM reasoning directly into the document workflow, authoring speed is accelerated by up to 4x.</p>
-
-<h2>2. Core Capabilities</h2>
-<ul>
-  <li><strong>Microsoft Word Ribbon & Typography:</strong> Full suite of font management, headings, paragraph alignment, checklists, and tables.</li>
-  <li><strong>VS Code-style Inline AI (Ctrl+K):</strong> Select any text or place your cursor to instantly rewrite, change tone, fix grammar, or insert elements.</li>
-  <li><strong>Copilot Sidebar Chat:</strong> Converse with your document, ask questions, and accept structured modifications with one click.</li>
-  <li><strong>Interoperability:</strong> Import and export directly to native <code>.docx</code>, <code>.pdf</code>, <code>.html</code>, and <code>.md</code>.</li>
-</ul>
-
-<h2>3. Project Timeline & Deliverables</h2>
-<table>
-  <thead>
-    <tr>
-      <th>Phase</th>
-      <th>Deliverable</th>
-      <th>Status</th>
-      <th>Target Date</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>Phase 1</td>
-      <td>Word Ribbon UI & Page View Layout</td>
-      <td><strong>Completed</strong></td>
-      <td>Q1</td>
-    </tr>
-    <tr>
-      <td>Phase 2</td>
-      <td>Tiptap Rich-Text Engine & Docx Exporter</td>
-      <td><strong>Completed</strong></td>
-      <td>Q2</td>
-    </tr>
-    <tr>
-      <td>Phase 3</td>
-      <td>Autonomous AI Copilot & Ctrl+K Inline Assistant</td>
-      <td><strong>In Progress</strong></td>
-      <td>Q3</td>
-    </tr>
-  </tbody>
-</table>
-
-<blockquote>
-  "The future of document authoring is not just typing faster, but thinking collaboratively with artificial intelligence."
-</blockquote>
-`,
+    content: initialContent || '<p></p>',
     onUpdate: ({ editor }) => {
       calculateStats(editor);
     },
@@ -369,7 +319,7 @@ export const DocumentEditor: React.FC<Props> = ({
                   />
                 )}
 
-                {/* Watermark on this specific page sheet */}
+                {/* Watermark on this specific page sheet (only when explicitly enabled) */}
                 {pageSettings.watermark && pageSettings.watermark !== 'none' && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
                     <span className="text-8xl font-black tracking-widest text-gray-400/15 -rotate-45 uppercase border-8 border-gray-400/15 px-12 py-4 rounded-xl">
@@ -377,38 +327,6 @@ export const DocumentEditor: React.FC<Props> = ({
                     </span>
                   </div>
                 )}
-
-                {/* Top Header of this specific page */}
-                <div
-                  className="flex items-center justify-between text-xs pb-2 border-b select-none opacity-60 no-print z-10"
-                  style={{
-                    borderColor: isDarkPaper ? '#383838' : '#e5e7eb',
-                    color: isDarkPaper ? '#a0a0a0' : '#6b7280'
-                  }}
-                >
-                  <span className="text-[10px] font-medium tracking-wide uppercase truncate max-w-[280px]">
-                    {documentTitle || 'Document'}
-                  </span>
-                  <span className="text-[10px] font-medium">Header</span>
-                </div>
-
-                <div className="flex-1" />
-
-                {/* Bottom Footer of this specific page */}
-                <div
-                  className="flex items-center justify-between text-xs pt-2 border-t select-none opacity-60 no-print z-10"
-                  style={{
-                    borderColor: isDarkPaper ? '#383838' : '#e5e7eb',
-                    color: isDarkPaper ? '#a0a0a0' : '#6b7280'
-                  }}
-                >
-                  <span className="text-[10px] font-medium tracking-wide uppercase truncate max-w-[280px]">
-                    {documentTitle || 'Document'}
-                  </span>
-                  <span className="text-[10px] font-semibold">
-                    Page {pIdx + 1} of {totalPages}
-                  </span>
-                </div>
               </div>
             ))}
           </div>
@@ -419,9 +337,9 @@ export const DocumentEditor: React.FC<Props> = ({
             style={{
               width: `${pageWidthNum}px`,
               minHeight: `${totalMinHeight}px`,
-              paddingTop: `${padTop + 24}px`,
+              paddingTop: `${padTop}px`,
               paddingRight: `${padRight}px`,
-              paddingBottom: `${padBottom + 24}px`,
+              paddingBottom: `${padBottom}px`,
               paddingLeft: `${padLeft}px`,
               columnCount: pageSettings.columns || 1,
               columnGap: '2rem'

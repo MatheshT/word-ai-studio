@@ -29,7 +29,7 @@ import { importDocxFile } from './utils/docxImport';
 
 export function App() {
   const [editor, setEditor] = useState<Editor | null>(null);
-  const [documentTitle, setDocumentTitle] = useState<string>('Project Proposal & Strategy');
+  const [documentTitle, setDocumentTitle] = useState<string>('Document 1');
   const [selectedText, setSelectedText] = useState<string>('');
   
   // Drawer & Modal states
