@@ -71,7 +71,7 @@ export function App() {
     size: 'a4',
     orientation: 'portrait',
     margins: 'normal',
-    zoom: 100,
+    zoom: 70,
     isDarkMode: false,
     watermark: 'none',
     columns: 1

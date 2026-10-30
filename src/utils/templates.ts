@@ -2,6 +2,89 @@ import type { Template } from '../types';
 
 export const WORD_TEMPLATES: Template[] = [
   {
+    id: 'engineering-cover-page',
+    name: 'Engineering Project Cover Page & Report',
+    category: 'Academic',
+    description: 'Anna University / Sri Shakthi Institute of Engineering & Technology project report title page format.',
+    previewColor: '#107c41',
+    content: `
+<div style="text-align: center; font-family: 'Times New Roman', serif; padding: 1rem 0;">
+  <h1 style="font-size: 16pt; font-weight: bold; line-height: 1.4; margin-bottom: 12px; text-transform: uppercase;">
+    DESIGN AND IMPLEMENTATION OF MICROPLASTICS REMOVAL FROM CONTAMINATED WATER BY ELECTROCOAGULATION
+  </h1>
+  
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 24px;">
+    21EE511 – ENGINEERING EXPLORATION V
+  </p>
+
+  <div style="margin: 24px 0;">
+    <p style="font-weight: bold; font-size: 10pt; letter-spacing: 0.15em; color: #15803d; text-transform: uppercase;">
+      POWERING THE YOUTH<br/>
+      EMPOWERING THE NATION
+    </p>
+  </div>
+
+  <p style="font-style: italic; font-size: 12pt; margin-top: 24px; margin-bottom: 16px;">
+    Submitted by
+  </p>
+
+  <table style="width: 85%; margin: 0 auto 32px auto; border: none; font-size: 11pt;">
+    <tbody>
+      <tr>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: left;">JEFFREY DANIEL C</td>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: right;">(714024105018)</td>
+      </tr>
+      <tr>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: left;">MATHAN T</td>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: right;">(714024105031)</td>
+      </tr>
+      <tr>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: left;">RAVI VINOD R</td>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: right;">(714024105038)</td>
+      </tr>
+      <tr>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: left;">VISHAL K</td>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: right;">(714024105054)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-style: italic; font-size: 11pt; margin-top: 24px; margin-bottom: 6px;">
+    In partial fulfillment for the award of the degree of
+  </p>
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 6px;">
+    BACHELOR OF ENGINEERING
+  </p>
+  <p style="font-size: 11pt; font-style: italic; margin-bottom: 6px;">
+    in
+  </p>
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 32px;">
+    ELECTRICAL AND ELECTRONICS ENGINEERING
+  </p>
+
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 4px;">
+    SRI SHAKTHI
+  </p>
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 4px;">
+    INSTITUTE OF ENGINEERING AND TECHNOLOGY
+  </p>
+  <p style="font-size: 10pt; margin-bottom: 4px;">
+    An Autonomous Institute, Accredited by NAAC with “A” Grade
+  </p>
+  <p style="font-size: 11pt; font-weight: bold; margin-bottom: 24px;">
+    COIMBATORE-62
+  </p>
+
+  <p style="font-size: 11pt; font-weight: bold; margin-bottom: 16px;">
+    ANNA UNIVERSITY: CHENNAI 600025
+  </p>
+  <p style="font-size: 11pt; font-weight: bold;">
+    NOVEMBER - 2026
+  </p>
+</div>
+`
+  },
+  {
     id: 'project-proposal',
     name: 'Executive Project Proposal',
     category: 'Business',

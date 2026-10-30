@@ -331,70 +331,103 @@ export const DocumentEditor: React.FC<Props> = ({
       >
         {/* Realistic Word Document Multi-Page Canvas with Watermark, Margins, and Gridlines */}
         <div
-          className="transition-transform duration-100 ease-out flex justify-center mb-16"
+          className="transition-transform duration-100 ease-out flex justify-center mb-16 relative"
           style={{
             transform: `scale(${pageSettings.zoom / 100})`,
-            transformOrigin: 'top center'
+            transformOrigin: 'top center',
+            width: `${pageWidthNum}px`
           }}
         >
-          <div
-            className={`shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-xs print-page transition-all relative overflow-hidden flex flex-col justify-between ${borderStyle} ${
-              isDarkPaper ? 'text-gray-100' : 'text-gray-900'
-            }`}
-            style={{
-              width: `${pageWidthNum}px`,
-              minHeight: `${totalMinHeight}px`,
-              paddingTop: `${padTop}px`,
-              paddingRight: `${padRight}px`,
-              paddingBottom: `${padBottom}px`,
-              paddingLeft: `${padLeft}px`,
-              backgroundColor: pageBgColor,
-              columnCount: pageSettings.columns || 1,
-              columnGap: '2rem'
-            }}
-          >
-            {/* Word Graph-Paper Gridlines (Overlaid across the page canvas) */}
-            {showGridlines && (
+          {/* Layer 1: Background Physical Paper Sheets (Each page in exact fixed dimensions) */}
+          <div className="absolute top-0 left-0 right-0 pointer-events-none flex flex-col items-center select-none z-0">
+            {Array.from({ length: totalPages }).map((_, pIdx) => (
               <div
-                className="absolute inset-0 pointer-events-none z-0"
+                key={pIdx}
+                className={`rounded-xs transition-all relative overflow-hidden flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${borderStyle}`}
                 style={{
-                  backgroundImage: isDarkPaper
-                    ? 'linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px)'
-                    : 'linear-gradient(to right, rgba(0, 0, 0, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1px, transparent 1px)',
-                  backgroundSize: '20px 20px',
-                  backgroundPosition: `${padLeft % 20}px ${padTop % 20}px`
+                  width: `${pageWidthNum}px`,
+                  height: `${pageHeightNum}px`,
+                  backgroundColor: pageBgColor,
+                  marginBottom: pIdx < totalPages - 1 ? '32px' : '0px',
+                  paddingTop: `${padTop}px`,
+                  paddingRight: `${padRight}px`,
+                  paddingBottom: `${padBottom}px`,
+                  paddingLeft: `${padLeft}px`
                 }}
-              />
-            )}
+              >
+                {/* Gridlines on this specific page sheet */}
+                {showGridlines && (
+                  <div
+                    className="absolute inset-0 pointer-events-none z-0"
+                    style={{
+                      backgroundImage: isDarkPaper
+                        ? 'linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px)'
+                        : 'linear-gradient(to right, rgba(0, 0, 0, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1px, transparent 1px)',
+                      backgroundSize: '20px 20px',
+                      backgroundPosition: `${padLeft % 20}px ${padTop % 20}px`
+                    }}
+                  />
+                )}
 
-            {/* Watermark Overlay on Each Page */}
-            {pageSettings.watermark && pageSettings.watermark !== 'none' && (
-              <div className="absolute inset-0 flex flex-col justify-around items-center pointer-events-none select-none z-0">
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <div key={i} className="flex items-center justify-center" style={{ height: `${pageHeightNum}px` }}>
+                {/* Watermark on this specific page sheet */}
+                {pageSettings.watermark && pageSettings.watermark !== 'none' && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
                     <span className="text-8xl font-black tracking-widest text-gray-400/15 -rotate-45 uppercase border-8 border-gray-400/15 px-12 py-4 rounded-xl">
                       {pageSettings.watermark}
                     </span>
                   </div>
-                ))}
+                )}
+
+                {/* Top Header of this specific page */}
+                <div
+                  className="flex items-center justify-between text-xs pb-2 border-b select-none opacity-60 no-print z-10"
+                  style={{
+                    borderColor: isDarkPaper ? '#383838' : '#e5e7eb',
+                    color: isDarkPaper ? '#a0a0a0' : '#6b7280'
+                  }}
+                >
+                  <span className="text-[10px] font-medium tracking-wide uppercase truncate max-w-[280px]">
+                    {documentTitle || 'Document'}
+                  </span>
+                  <span className="text-[10px] font-medium">Header</span>
+                </div>
+
+                <div className="flex-1" />
+
+                {/* Bottom Footer of this specific page */}
+                <div
+                  className="flex items-center justify-between text-xs pt-2 border-t select-none opacity-60 no-print z-10"
+                  style={{
+                    borderColor: isDarkPaper ? '#383838' : '#e5e7eb',
+                    color: isDarkPaper ? '#a0a0a0' : '#6b7280'
+                  }}
+                >
+                  <span className="text-[10px] font-medium tracking-wide uppercase truncate max-w-[280px]">
+                    {documentTitle || 'Document'}
+                  </span>
+                  <span className="text-[10px] font-semibold">
+                    Page {pIdx + 1} of {totalPages}
+                  </span>
+                </div>
               </div>
-            )}
+            ))}
+          </div>
 
-            {/* Top Header of Page 1 */}
+          {/* Layer 2: Editable ProseMirror Content Layer (Seamlessly flows across the sheets) */}
+          <div
+            className={`relative z-10 print-page ${isDarkPaper ? 'text-gray-100' : 'text-gray-900'}`}
+            style={{
+              width: `${pageWidthNum}px`,
+              minHeight: `${totalMinHeight}px`,
+              paddingTop: `${padTop + 24}px`,
+              paddingRight: `${padRight}px`,
+              paddingBottom: `${padBottom + 24}px`,
+              paddingLeft: `${padLeft}px`,
+              columnCount: pageSettings.columns || 1,
+              columnGap: '2rem'
+            }}
+          >
             <div
-              className="flex items-center justify-between text-xs pb-3 border-b mb-6 select-none opacity-60 no-print relative z-10"
-              style={{
-                borderColor: isDarkPaper ? '#383838' : '#e5e7eb',
-                color: isDarkPaper ? '#a0a0a0' : '#6b7280'
-              }}
-            >
-              <span className="text-[10px] font-medium tracking-wide uppercase">{documentTitle || 'Document'}</span>
-              <span className="text-[10px] font-medium">Page 1</span>
-            </div>
-
-            {/* Document Flowing Content */}
-            <div
-              className="relative z-10 flex-1"
               style={{
                 textIndent: pageSettings.firstLineIndent
                   ? `${pageSettings.firstLineIndent}px`
@@ -402,18 +435,6 @@ export const DocumentEditor: React.FC<Props> = ({
               }}
             >
               <EditorContent editor={editor} />
-            </div>
-
-            {/* Bottom Footer of Final Page */}
-            <div
-              className="flex items-center justify-between text-xs pt-4 border-t mt-8 select-none opacity-60 no-print relative z-10"
-              style={{
-                borderColor: isDarkPaper ? '#383838' : '#e5e7eb',
-                color: isDarkPaper ? '#a0a0a0' : '#6b7280'
-              }}
-            >
-              <span className="text-[10px] font-medium tracking-wide uppercase">{documentTitle || 'Document'}</span>
-              <span className="text-[10px] font-semibold">Page {totalPages} of {totalPages}</span>
             </div>
           </div>
         </div>

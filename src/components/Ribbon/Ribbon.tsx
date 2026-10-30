@@ -198,13 +198,74 @@ export const Ribbon: React.FC<Props> = ({
 
   const handleInsertCoverPage = () => {
     const coverHtml = `
-<div style="border-bottom: 6px solid #0078d4; padding-bottom: 2rem; margin-bottom: 2.5rem; text-align: center;">
-  <p style="font-size: 14pt; color: #0078d4; text-transform: uppercase; letter-spacing: 2px; font-weight: bold;">Official Corporate Document</p>
-  <h1 style="font-size: 32pt; margin: 1.5rem 0 1rem; color: #1b1a19;">${documentTitle || 'STRATEGIC MASTER PLAN'}</h1>
-  <p style="font-size: 14pt; color: #555555; font-style: italic;">Authored by Enterprise Systems Architecture Team</p>
-  <p style="font-size: 11pt; color: #777777; margin-top: 2rem;">Date of Publication: ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+<div style="text-align: center; font-family: 'Times New Roman', serif; padding: 2rem 0; margin-bottom: 2rem;">
+  <h1 style="font-size: 16pt; font-weight: bold; line-height: 1.4; margin-bottom: 12px; text-transform: uppercase;">
+    DESIGN AND IMPLEMENTATION OF MICROPLASTICS REMOVAL FROM CONTAMINATED WATER BY ELECTROCOAGULATION
+  </h1>
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 24px;">
+    21EE511 – ENGINEERING EXPLORATION V
+  </p>
+  <div style="margin: 24px 0;">
+    <p style="font-weight: bold; font-size: 10pt; letter-spacing: 0.15em; color: #15803d; text-transform: uppercase;">
+      POWERING THE YOUTH<br/>
+      EMPOWERING THE NATION
+    </p>
+  </div>
+  <p style="font-style: italic; font-size: 12pt; margin-top: 24px; margin-bottom: 16px;">
+    Submitted by
+  </p>
+  <table style="width: 85%; margin: 0 auto 32px auto; border: none; font-size: 11pt;">
+    <tbody>
+      <tr>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: left;">JEFFREY DANIEL C</td>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: right;">(714024105018)</td>
+      </tr>
+      <tr>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: left;">MATHAN T</td>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: right;">(714024105031)</td>
+      </tr>
+      <tr>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: left;">RAVI VINOD R</td>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: right;">(714024105038)</td>
+      </tr>
+      <tr>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: left;">VISHAL K</td>
+        <td style="border: none; padding: 4px; font-weight: bold; text-align: right;">(714024105054)</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-style: italic; font-size: 11pt; margin-top: 24px; margin-bottom: 6px;">
+    In partial fulfillment for the award of the degree of
+  </p>
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 6px;">
+    BACHELOR OF ENGINEERING
+  </p>
+  <p style="font-size: 11pt; font-style: italic; margin-bottom: 6px;">
+    in
+  </p>
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 32px;">
+    ELECTRICAL AND ELECTRONICS ENGINEERING
+  </p>
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 4px;">
+    SRI SHAKTHI
+  </p>
+  <p style="font-size: 12pt; font-weight: bold; margin-bottom: 4px;">
+    INSTITUTE OF ENGINEERING AND TECHNOLOGY
+  </p>
+  <p style="font-size: 10pt; margin-bottom: 4px;">
+    An Autonomous Institute, Accredited by NAAC with “A” Grade
+  </p>
+  <p style="font-size: 11pt; font-weight: bold; margin-bottom: 24px;">
+    COIMBATORE-62
+  </p>
+  <p style="font-size: 11pt; font-weight: bold; margin-bottom: 16px;">
+    ANNA UNIVERSITY: CHENNAI 600025
+  </p>
+  <p style="font-size: 11pt; font-weight: bold;">
+    NOVEMBER - 2026
+  </p>
 </div>
-<hr/>
+<div data-type="page-break" class="word-manual-page-break"></div>
 `;
     const cur = editor.getHTML();
     editor.commands.setContent(`${coverHtml}${cur}`);
@@ -1179,6 +1240,53 @@ export const Ribbon: React.FC<Props> = ({
                 </label>
               </div>
               <span className="text-[10px] text-gray-400 text-center font-normal">Show</span>
+            </div>
+
+            {/* Zoom Controls (Matching Word 365 View Tab) */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => onPageSettingsChange({ ...pageSettings, zoom: 70 })}
+                  className={`p-1 px-2.5 rounded flex flex-col items-center transition-colors ${
+                    pageSettings.zoom === 70 ? 'bg-[#3b3a39] text-white font-bold' : 'hover:bg-[#333333] text-gray-200'
+                  }`}
+                  title="One Page (70%): Fits entire page on screen matching document preview"
+                >
+                  <FileText className="w-5 h-5 text-blue-400" />
+                  <span className="text-[10px]">One Page</span>
+                </button>
+                <button
+                  onClick={() => onPageSettingsChange({ ...pageSettings, zoom: 100 })}
+                  className={`p-1 px-2 rounded flex flex-col items-center transition-colors ${
+                    pageSettings.zoom === 100 ? 'bg-[#3b3a39] text-white font-bold' : 'hover:bg-[#333333] text-gray-200'
+                  }`}
+                  title="100% Zoom (Actual Size)"
+                >
+                  <span className="w-5 h-5 flex items-center justify-center font-bold text-xs text-amber-300">100</span>
+                  <span className="text-[10px]">100%</span>
+                </button>
+                <button
+                  onClick={() => onPageSettingsChange({ ...pageSettings, zoom: 120 })}
+                  className={`p-1 px-2 rounded flex flex-col items-center transition-colors ${
+                    pageSettings.zoom === 120 ? 'bg-[#3b3a39] text-white font-bold' : 'hover:bg-[#333333] text-gray-200'
+                  }`}
+                  title="Page Width (120%)"
+                >
+                  <Maximize2 className="w-5 h-5 text-emerald-400" />
+                  <span className="text-[10px]">Page Width</span>
+                </button>
+                <button
+                  onClick={() => onPageSettingsChange({ ...pageSettings, zoom: 55 })}
+                  className={`p-1 px-2 rounded flex flex-col items-center transition-colors ${
+                    pageSettings.zoom === 55 ? 'bg-[#3b3a39] text-white font-bold' : 'hover:bg-[#333333] text-gray-200'
+                  }`}
+                  title="Multiple Pages (55%)"
+                >
+                  <Layers className="w-5 h-5 text-purple-400" />
+                  <span className="text-[10px]">Multiple Pages</span>
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Zoom</span>
             </div>
           </>
         )}
