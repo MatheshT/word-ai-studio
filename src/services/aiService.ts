@@ -7,19 +7,23 @@ export const DEFAULT_AI_SETTINGS: AISettings = {
   baseUrl: 'http://localhost:11434',
   temperature: 0.7,
   systemPrompt: `You are an elite AI Writing and Document Assistant integrated inside a Microsoft Word-like word processor (similar to VS Code Copilot and Microsoft 365 Copilot).
-Your goal is to help the user write, edit, format, summarize, and restructure documents.
-You have the power to make direct changes to the user's document.
-When the user asks you to write, edit, rewrite, or insert content (like tables, sections, summaries), ALWAYS provide the exact text or HTML markup to be placed in the document.
-If you are suggesting a direct document modification, include a formatted proposal block at the end of your response like this:
+Your goal is to help the user:
+1. WRITE COMPLETE PROJECT DOCUMENTS: Draft comprehensive project reports, research papers, abstracts, methodologies, parameters, and conclusions.
+2. CHANGE & POLISH CONTENT: Rewrite, tone-shift, expand, condense, or elevate selected paragraphs with precision.
+3. ADD SUITABLE DIAGRAMS: Generate clean, responsive, high-resolution SVG process flowcharts, architecture diagrams, and block diagrams (<svg viewBox="0 0 ...">...</svg>) with labeled blocks, clear directional arrows, and figure captions that embed directly into the document.
+4. ORGANIZE & RESTRUCTURE PAGES: Structure messy or raw notes into formal academic or executive hierarchy (H1, H2, H3, numbered lists, comparison tables, and page dividers).
+
+ALWAYS provide exact HTML markup to be placed in the document.
+When proposing changes or new content, include a formatted proposal block at the end of your response:
 \`\`\`action
 {
-  "type": "replace_selection" | "insert_at_cursor" | "insert_table" | "append_section",
+  "type": "replace_selection" | "insert_at_cursor" | "insert_table" | "append_section" | "full_rewrite",
   "title": "Short title of change",
-  "description": "Brief explanation of what was changed",
+  "description": "Brief explanation of what was created or changed",
   "newContent": "Exact HTML or formatted text to insert"
 }
 \`\`\`
-Supported HTML tags for document insertion: <h2>, <h3>, <p>, <strong>, <em>, <u>, <ul>, <ol>, <li>, <table>, <tr>, <th>, <td>, <blockquote>.`
+Supported HTML tags: <h1>, <h2>, <h3>, <p>, <strong>, <em>, <u>, <ul>, <ol>, <li>, <table>, <tr>, <th>, <td>, <svg>, <rect>, <path>, <text>, <polygon>, <g>, <blockquote>.`
 };
 
 export class AIService {
@@ -310,6 +314,206 @@ Current Document Sample: ${docContext.fullDocumentText.slice(0, 3000)}`
   ): { text: string; proposal?: ActionProposal } {
     const query = userQuery.toLowerCase();
 
+    // 1. ADD SUITABLE DIAGRAM / FLOWCHART / BLOCK DIAGRAM
+    if (query.includes('diagram') || query.includes('flowchart') || query.includes('block')) {
+      const diagramHtml = `
+<div style="margin: 1.5rem auto; text-align: center; max-width: 680px; user-select: none;">
+  <svg viewBox="0 0 680 150" style="width: 100%; height: auto; font-family: 'Segoe UI', Arial, sans-serif; background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+    <defs>
+      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#0284c7;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#0369a1;stop-opacity:1" />
+      </linearGradient>
+      <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#047857;stop-opacity:1" />
+      </linearGradient>
+      <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:1" />
+      </linearGradient>
+      <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#ea580c;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#c2410c;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+
+    <!-- Block 1: Feed Input -->
+    <rect x="15" y="30" width="130" height="75" rx="8" fill="url(#grad1)" stroke="#0284c7" stroke-width="2"/>
+    <text x="80" y="62" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">Contaminated Water</text>
+    <text x="80" y="80" fill="#e0f2fe" font-size="10" text-anchor="middle">Feed Reservoir</text>
+    
+    <!-- Flow Arrow 1 -->
+    <path d="M 145 67 L 175 67" stroke="#64748b" stroke-width="2.5"/>
+    <polygon points="175,62 185,67 175,72" fill="#64748b"/>
+
+    <!-- Block 2: Flow Control -->
+    <rect x="185" y="30" width="130" height="75" rx="8" fill="url(#grad2)" stroke="#059669" stroke-width="2"/>
+    <text x="250" y="62" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">Peristaltic Pump</text>
+    <text x="250" y="80" fill="#d1fae5" font-size="10" text-anchor="middle">& Flow Regulation</text>
+
+    <!-- Flow Arrow 2 -->
+    <path d="M 315 67 L 345 67" stroke="#64748b" stroke-width="2.5"/>
+    <polygon points="345,62 355,67 345,72" fill="#64748b"/>
+
+    <!-- Block 3: Reactor & DC Power -->
+    <rect x="355" y="30" width="140" height="75" rx="8" fill="url(#grad3)" stroke="#7c3aed" stroke-width="2"/>
+    <text x="425" y="58" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">Electrocoagulation</text>
+    <text x="425" y="74" fill="#f3e8ff" font-size="10" text-anchor="middle">Reactor (Al/Fe Plates)</text>
+    <text x="425" y="90" fill="#ddd6fe" font-size="9" text-anchor="middle">0 - 30V / 0 - 5A DC</text>
+
+    <!-- Flow Arrow 3 -->
+    <path d="M 495 67 L 525 67" stroke="#64748b" stroke-width="2.5"/>
+    <polygon points="525,62 535,67 525,72" fill="#64748b"/>
+
+    <!-- Block 4: Separation & Output -->
+    <rect x="535" y="30" width="130" height="75" rx="8" fill="url(#grad4)" stroke="#ea580c" stroke-width="2"/>
+    <text x="600" y="62" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">Flotation / Treated</text>
+    <text x="600" y="80" fill="#ffedd5" font-size="10" text-anchor="middle">Clean Water Tank</text>
+  </svg>
+  <p style="font-size: 10pt; font-style: italic; color: #475569; margin-top: 8px; font-weight: 600;">
+    Figure: System Architecture & Electrocoagulation Process Flow Diagram
+  </p>
+</div>`;
+
+      return {
+        text: `📊 I generated a suitable **System Architecture & Process Flow Block Diagram** tailored to your engineering project. Click **"Apply to Document"** to insert the interactive diagram directly into your document!`,
+        proposal: {
+          id: Math.random().toString(36).substring(2, 9),
+          type: 'insert_at_cursor',
+          title: 'Insert System Architecture Block Diagram',
+          description: 'A clean, multi-stage engineering process flowchart SVG diagram.',
+          newContent: diagramHtml,
+          isApplied: false
+        }
+      };
+    }
+
+    // 2. WRITE DOCUMENT FOR PROJECT
+    if (query.includes('write document') || query.includes('project') || query.includes('thesis') || query.includes('report')) {
+      const projectHtml = `
+<h1>DESIGN AND IMPLEMENTATION OF MICROPLASTICS REMOVAL FROM CONTAMINATED WATER BY ELECTROCOAGULATION</h1>
+<p style="text-align: center; font-style: italic; color: #475569; margin-bottom: 2rem;">21EE511 – ENGINEERING EXPLORATION V • DEPARTMENT OF ELECTRICAL AND ELECTRONICS ENGINEERING</p>
+
+<h2>1. Abstract</h2>
+<p>Microplastics contamination in aquatic ecosystems represents an urgent environmental and public health crisis. Traditional filtration and biological treatments struggle with sub-millimeter particles. This project designs and implements an automated continuous-flow electrocoagulation (EC) reactor utilizing sacrificial aluminum and iron electrodes to destabilize suspended microplastic polymers. Operating at an optimal current density of 15–35 mA/cm² and neutral pH (6.5–7.5), the system achieves over 92% removal efficiency with minimal chemical additives.</p>
+
+<h2>2. System Architecture & Objectives</h2>
+<ul>
+  <li><strong>Continuous Treatment Flow:</strong> Automated peristaltic metering pumps ensuring uniform hydraulic retention time (HRT).</li>
+  <li><strong>In-situ Flocculation:</strong> Electrolytic dissolution of Al³⁺/Fe²⁺ ions generating coagulant species at the electrode interface.</li>
+  <li><strong>Micro-bubble Flotation:</strong> Hydrogen micro-bubbles produced at the cathode lift coagulated flocs to the surface for skimming.</li>
+</ul>
+
+<h2>3. Experimental Operating Parameters</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Operational Parameter</th>
+      <th>Investigated Range</th>
+      <th>Optimal Value</th>
+      <th>Observed Effect</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Current Density</strong></td>
+      <td>5 – 50 mA/cm²</td>
+      <td>25 mA/cm²</td>
+      <td>Controls bubble production and coagulant release rate</td>
+    </tr>
+    <tr>
+      <td><strong>Solution pH</strong></td>
+      <td>4 – 9</td>
+      <td>6.8 – 7.2</td>
+      <td>Maximizes insoluble Al(OH)₃ precipitate formation</td>
+    </tr>
+    <tr>
+      <td><strong>Electrode Gap</strong></td>
+      <td>0.5 – 2.5 cm</td>
+      <td>1.0 cm</td>
+      <td>Minimizes ohmic resistance and energy consumption</td>
+    </tr>
+    <tr>
+      <td><strong>Retention Time</strong></td>
+      <td>10 – 60 min</td>
+      <td>25 min</td>
+      <td>Ensures complete aggregation of microplastic particles</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>4. Results and Validation</h2>
+<p>Turbidity, particle size analysis (DLS), and spectrophotometric assays confirmed significant reduction in particle count across polyethylene (PE) and polypropylene (PP) synthetic test samples. Power consumption was verified at less than 1.4 kWh/m³, demonstrating high commercial and community feasibility.</p>
+`;
+      return {
+        text: `📝 I drafted a comprehensive, multi-section **Engineering Project Document** complete with Abstract, System Objectives, Parameter Table, and Experimental Validation. Click **"Apply to Document"** below!`,
+        proposal: {
+          id: Math.random().toString(36).substring(2, 9),
+          type: 'append_section',
+          title: 'Insert Complete Project Report',
+          description: 'Multi-chapter engineering document with abstract, parameters table, and findings.',
+          newContent: projectHtml,
+          isApplied: false
+        }
+      };
+    }
+
+    // 3. ORGANIZE THIS PAGE
+    if (query.includes('organize') || query.includes('format') || query.includes('structure')) {
+      const organizedHtml = `
+<h2>1. Overview & Project Objectives</h2>
+<p>The primary aim is establishing robust operational parameters for high-throughput water treatment.</p>
+<ul>
+  <li><strong>Target Particles:</strong> Polyethylene (PE), Polystyrene (PS), and Polypropylene (PP).</li>
+  <li><strong>Electrode Configuration:</strong> Monopolar parallel connection for uniform field distribution.</li>
+  <li><strong>Safety Monitoring:</strong> Automated temperature cut-off and polarity reversal preventing passivation.</li>
+</ul>
+
+<h2>2. Operational Parameter Summary</h2>
+<table>
+  <thead>
+    <tr><th>Stage</th><th>Control Variable</th><th>Specification</th><th>Monitoring Method</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Feed Stage</td><td>Flow Velocity</td><td>1.2 L/min</td><td>Flow Sensor Inline</td></tr>
+    <tr><td>Reaction Stage</td><td>Current Density</td><td>25 mA/cm²</td><td>Ammeter / Hall Sensor</td></tr>
+    <tr><td>Separation Stage</td><td>Retention Time</td><td>20 min</td><td>Chamber Volume Ratio</td></tr>
+  </tbody>
+</table>
+`;
+      return {
+        text: `📐 I organized your page into a clear **Academic / Engineering Structure** with numbered sections, categorized bullet points, and an operational summary table. Click **"Apply to Document"** to update your page!`,
+        proposal: {
+          id: Math.random().toString(36).substring(2, 9),
+          type: 'append_section',
+          title: 'Organize Page Structure',
+          description: 'Hierarchical headings, structured data table, and clean formatting.',
+          newContent: organizedHtml,
+          isApplied: false
+        }
+      };
+    }
+
+    // 4. CHANGE / REWRITE CONTENT
+    if (query.includes('change') || query.includes('rewrite') || query.includes('improve') || query.includes('rephrase')) {
+      const baseText = docContext.selectedText || 'The system was tested to remove microplastics by passing electric current through metal plates.';
+      const polished = `<p style="line-height: 1.6;"><strong>${baseText.trim()}</strong></p>
+<p style="line-height: 1.6;">Specifically, comprehensive empirical trials evaluated the electrocoagulation reactor across varying current densities, demonstrating rapid polymer destabilization and significant flocculation efficiency with minimal specific energy consumption.</p>`;
+      return {
+        text: `✏️ I refined and upgraded the content with technical clarity, academic vocabulary, and active phrasing. Click **"Apply to Document"** to replace the text!`,
+        proposal: {
+          id: Math.random().toString(36).substring(2, 9),
+          type: docContext.selectedText ? 'replace_selection' : 'insert_at_cursor',
+          title: 'Upgrade & Refine Content',
+          description: 'Academic rigor, improved sentence rhythm, and technical depth.',
+          originalText: docContext.selectedText,
+          newContent: polished,
+          isApplied: false
+        }
+      };
+    }
+
     if (query.includes('table')) {
       const tableHtml = `
 <table>
@@ -390,10 +594,80 @@ Current Document Sample: ${docContext.fullDocumentText.slice(0, 3000)}`
 
   private static demoInlineResponse(prompt: string, selectedText: string): { replacementText: string } {
     const p = prompt.toLowerCase();
-    if (p.includes('formal') || p.includes('professional')) {
+
+    if (p.includes('diagram') || p.includes('flowchart') || p.includes('block')) {
+      return {
+        replacementText: `<div style="margin: 1.5rem auto; text-align: center; max-width: 650px;">
+  <svg viewBox="0 0 650 130" style="width: 100%; height: auto; font-family: sans-serif; background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; padding: 10px;">
+    <rect x="10" y="30" width="125" height="65" rx="6" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
+    <text x="72" y="58" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">Feed Reservoir</text>
+    <text x="72" y="74" fill="#e0f2fe" font-size="10" text-anchor="middle">Contaminated Input</text>
+
+    <path d="M 135 62 L 170 62" stroke="#64748b" stroke-width="2.5"/>
+    <polygon points="170,57 180,62 170,67" fill="#64748b"/>
+
+    <rect x="180" y="30" width="125" height="65" rx="6" fill="#059669" stroke="#047857" stroke-width="2"/>
+    <text x="242" y="58" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">Metering Pump</text>
+    <text x="242" y="74" fill="#d1fae5" font-size="10" text-anchor="middle">Flow Regulation</text>
+
+    <path d="M 305 62 L 340 62" stroke="#64748b" stroke-width="2.5"/>
+    <polygon points="340,57 350,62 340,67" fill="#64748b"/>
+
+    <rect x="350" y="30" width="135" height="65" rx="6" fill="#7c3aed" stroke="#6d28d9" stroke-width="2"/>
+    <text x="417" y="58" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">EC Reactor Chamber</text>
+    <text x="417" y="74" fill="#f3e8ff" font-size="10" text-anchor="middle">Sacrificial Electrodes</text>
+
+    <path d="M 485 62 L 520 62" stroke="#64748b" stroke-width="2.5"/>
+    <polygon points="520,57 530,62 520,67" fill="#64748b"/>
+
+    <rect x="530" y="30" width="110" height="65" rx="6" fill="#ea580c" stroke="#c2410c" stroke-width="2"/>
+    <text x="585" y="58" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">Clean Discharge</text>
+    <text x="585" y="74" fill="#ffedd5" font-size="10" text-anchor="middle">Treated Water</text>
+  </svg>
+  <p style="font-size: 10pt; font-style: italic; color: #64748b; margin-top: 6px;">Figure: System Process & Flow Block Diagram</p>
+</div>`
+      };
+    }
+
+    if (p.includes('project') || p.includes('write document')) {
+      return {
+        replacementText: `<h2>Design and Implementation Overview</h2>
+<p>This project establishes a continuous-flow electrocoagulation framework capable of eliminating suspended microplastic polymers. Operating at an electric density of 25 mA/cm² with sacrificial Al-Fe electrodes, the process causes aggregation and micro-flotation for over 92% removal efficiency.</p>
+<table>
+  <thead><tr><th>Parameter</th><th>Target Value</th><th>Operational Range</th></tr></thead>
+  <tbody>
+    <tr><td>Current Density</td><td>25 mA/cm²</td><td>5 - 50 mA/cm²</td></tr>
+    <tr><td>Retention Time</td><td>20 min</td><td>10 - 45 min</td></tr>
+    <tr><td>Operating pH</td><td>7.0</td><td>6.5 - 7.5</td></tr>
+  </tbody>
+</table>`
+      };
+    }
+
+    if (p.includes('organize') || p.includes('structure')) {
+      return {
+        replacementText: `<h2>1. Project Objectives</h2>
+<ul>
+  <li>Continuous microplastic removal through automated electrochemical destabilization</li>
+  <li>Minimizing secondary chemical sludge generation</li>
+  <li>Optimizing electrical energy consumption below 1.5 kWh/m³</li>
+</ul>
+<h2>2. Technical Execution Schedule</h2>
+<table>
+  <thead><tr><th>Phase</th><th>Activity</th><th>Milestone</th></tr></thead>
+  <tbody>
+    <tr><td>Phase 1</td><td>System Architecture & Design</td><td>Completed</td></tr>
+    <tr><td>Phase 2</td><td>Reactor Fabrication & Circuit Integration</td><td>In Progress</td></tr>
+    <tr><td>Phase 3</td><td>Validation & Spectrophotometry Testing</td><td>Scheduled</td></tr>
+  </tbody>
+</table>`
+      };
+    }
+
+    if (p.includes('formal') || p.includes('professional') || p.includes('change') || p.includes('rewrite')) {
       return {
         replacementText: selectedText 
-          ? `In light of strategic assessments, ${selectedText.replace(/\b(I think|maybe|good|bad)\b/gi, 'our analysis indicates')} - thereby ensuring sustained operational excellence.`
+          ? `<p style="line-height: 1.6;">${selectedText.replace(/\b(I think|maybe|good|bad)\b/gi, 'empirical evaluations confirm')}. Specifically, systematic parametric analysis indicates superior stability and accelerated flocculation rates across all operational conditions.</p>`
           : `<p>We are pleased to submit this comprehensive overview detailing the strategic milestones and operational deliverables scheduled for the forthcoming fiscal quarter.</p>`
       };
     }

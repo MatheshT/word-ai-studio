@@ -118,6 +118,30 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
                 el.getAttribute('data-type') !== 'page-break-widget'
             );
 
+            // Accurate DOM node resolver for ProseMirror positions
+            const getBlockDomNode = (nodePos: number, fallbackIdx: number): HTMLElement | null => {
+              try {
+                const directDom = editorView.nodeDOM(nodePos);
+                if (directDom instanceof HTMLElement) return directDom;
+                if (directDom && directDom.parentElement) return directDom.parentElement;
+              } catch (e) {}
+
+              try {
+                const atPos = editorView.domAtPos(nodePos + 1);
+                if (atPos && atPos.node) {
+                  if (atPos.node instanceof HTMLElement) {
+                    let cur: HTMLElement | null = atPos.node;
+                    while (cur && cur.parentElement && cur.parentElement !== editorView.dom) {
+                      cur = cur.parentElement;
+                    }
+                    if (cur && cur.parentElement === editorView.dom) return cur;
+                  }
+                }
+              } catch (e) {}
+
+              return (nonWidgetChildren[fallbackIdx] as HTMLElement) || null;
+            };
+
             let currentPos = 0;
             for (let i = 0; i < doc.childCount; i++) {
               const node = doc.child(i);
@@ -140,18 +164,24 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
               }
 
               // Measure the rendered DOM element corresponding to this block
-              const domNode = (nonWidgetChildren[i] as HTMLElement) || null;
+              const domNode = getBlockDomNode(nodePos, i);
               let nodeHeight = 24;
               if (domNode) {
+                const rect = domNode.getBoundingClientRect();
                 const style = window.getComputedStyle(domNode);
-                const marginTop = parseFloat(style.marginTop) || 0;
-                const marginBottom = parseFloat(style.marginBottom) || 0;
-                nodeHeight = (domNode.offsetHeight || 24) + marginTop + marginBottom;
+                const marginTop = Math.max(0, parseFloat(style.marginTop) || 0);
+                const marginBottom = Math.max(0, parseFloat(style.marginBottom) || 0);
+                nodeHeight = Math.max(16, rect.height + marginTop + marginBottom);
               }
 
-              // If block overflows the remaining usable space on the page, move the entire block to next page!
-              // Uses a safe margin threshold so tables and paragraphs never bleed into the desk gap
-              if (accumulatedHeight + nodeHeight > usableHeight && accumulatedHeight > 20) {
+              // Word formatting rules:
+              // 1. Prevent orphan headings: A heading needs at least 80px space after it so it never sits stranded at the bottom of a page
+              // 2. Keep tables together: If table fits on a single page, push the entire table to next page if it doesn't fit here
+              const isHeading = node.type.name === 'heading';
+              const minSpaceRequired = isHeading ? nodeHeight + 80 : nodeHeight;
+
+              // If block overflows remaining usable space on page, move cleanly to next page!
+              if (accumulatedHeight + minSpaceRequired > usableHeight && accumulatedHeight > 20) {
                 const unusedHeight = Math.max(0, usableHeight - accumulatedHeight);
                 const spacerHeight = unusedHeight + opts.padBottom + 32 + opts.padTop;
                 pageNumber++;
@@ -226,6 +256,8 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
               widgetDom.style.flexDirection = 'column';
               widgetDom.style.justifyContent = 'flex-end';
               widgetDom.style.boxSizing = 'border-box';
+              widgetDom.style.overflow = 'hidden';
+              widgetDom.style.contain = 'layout style paint';
 
               const textColor = opts.isDarkPaper ? '#9ca3af' : '#6b7280';
               const dividerColor = opts.isDarkPaper ? '#383838' : '#e5e7eb';
@@ -245,18 +277,26 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
                   ? `Page ${bp.pageNumber} of ${totalPages}`
                   : '';
 
+              const footerBorderStyle = (opts.showFooter || (opts.pageNumberPosition && opts.pageNumberPosition !== 'none' && opts.pageNumberPosition !== 'top-right'))
+                ? `border-top: 1px solid ${dividerColor};`
+                : '';
+
+              const headerBorderStyle = (opts.showHeader || opts.pageNumberPosition === 'top-right')
+                ? `border-bottom: 1px solid ${dividerColor};`
+                : '';
+
               widgetDom.innerHTML = `
                 <!-- 1. White paper spacer: fills remaining body height of previous page -->
                 <div style="height: ${bp.unusedHeight}px; background-color: ${opts.pageBgColor}; width: 100%;"></div>
 
                 <!-- 2. Bottom margin / Footer of previous page -->
-                <div class="cursor-pointer group hover:bg-blue-50/10 transition-colors" style="background-color: ${opts.pageBgColor}; height: ${opts.padBottom}px; padding: 0 ${opts.padLeft}px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid ${dividerColor}; color: ${textColor}; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); box-sizing: border-box;" title="Click to edit Footer">
+                <div class="cursor-pointer group hover:bg-blue-50/10 transition-colors" style="background-color: ${opts.pageBgColor}; height: ${opts.padBottom}px; padding: 0 ${opts.padLeft}px; display: flex; align-items: center; justify-content: space-between; ${footerBorderStyle} color: ${textColor}; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.15); box-sizing: border-box;" title="Click to edit Footer">
                   <span style="font-size: 10px; font-weight: 500; font-family: sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%;">${prevFooterText}</span>
                   <span style="font-weight: 500; font-family: sans-serif; font-size: 10px; margin-left: auto;">${prevPageNum}</span>
                 </div>
 
                 <!-- 3. Dark Workspace Desk Gap between the two physical sheets -->
-                <div style="height: 32px; background-color: #1a1a1a; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 3px 6px rgba(0,0,0,0.5), inset 0 -3px 6px rgba(0,0,0,0.5); box-sizing: border-box;">
+                <div style="height: 32px; background-color: #1e1e1e; position: relative; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 3px 6px rgba(0,0,0,0.5), inset 0 -3px 6px rgba(0,0,0,0.5); box-sizing: border-box;">
                   <div style="position: absolute; left: 0; right: 0; height: 1px; background-color: #2e2e2e;"></div>
                   <span style="position: relative; background-color: #262626; color: #a3a3a3; font-size: 10px; font-weight: 600; padding: 2px 12px; border-radius: 9999px; border: 1px solid #3d3d3d; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">
                     <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #0078d4;"></span>
@@ -265,7 +305,7 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
                 </div>
 
                 <!-- 4. Top margin / Header of next page -->
-                <div class="cursor-pointer group hover:bg-blue-50/10 transition-colors" style="background-color: ${opts.pageBgColor}; height: ${opts.padTop}px; padding: 0 ${opts.padLeft}px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid ${dividerColor}; color: ${textColor}; font-size: 11px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.15); box-sizing: border-box;" title="Click to edit Header">
+                <div class="cursor-pointer group hover:bg-blue-50/10 transition-colors" style="background-color: ${opts.pageBgColor}; height: ${opts.padTop}px; padding: 0 ${opts.padLeft}px; display: flex; align-items: center; justify-content: space-between; ${headerBorderStyle} color: ${textColor}; font-size: 11px; box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.15); box-sizing: border-box;" title="Click to edit Header">
                   <span style="font-size: 10px; font-weight: 500; font-family: sans-serif; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 60%;">${nextHeaderText}</span>
                   <span style="font-weight: 500; font-family: sans-serif; font-size: 10px; margin-left: auto;">${nextTopPageNum}</span>
                 </div>

@@ -76,13 +76,15 @@ export const InlineAIModal: React.FC<Props> = ({
   };
 
   const quickActions = [
+    { label: '✍️ Write Project Document', prompt: 'Write a comprehensive engineering project section with abstract, methodology, and parameters table' },
+    { label: '✏️ Change This Content', prompt: 'Rewrite and elevate this content with technical rigor, clarity, and academic precision' },
+    { label: '📊 Add Suitable Diagram', prompt: 'Add a suitable system architecture process flow block diagram for this project' },
+    { label: '📐 Organize This Page', prompt: 'Organize this page into standard university engineering format with numbered headings and structured tables' },
     { label: '✨ Fix Grammar', prompt: 'Fix all grammar, typos, and punctuation while preserving the voice' },
     { label: '💼 Executive Tone', prompt: 'Rewrite in an executive, formal business tone' },
     { label: '✂️ Concise / Shorten', prompt: 'Condense into clear, concise sentences removing fluff' },
     { label: '📈 Expand & Elaborate', prompt: 'Elaborate on this with richer detail, context, and examples' },
-    { label: '📊 3x3 Table', prompt: 'Organize this information into a clean structured 3x3 table' },
-    { label: '🌐 Translate to Spanish', prompt: 'Translate this accurately into professional Spanish' },
-    { label: '🌐 Translate to French', prompt: 'Translate this accurately into professional French' },
+    { label: '📋 Data Table', prompt: 'Organize this information into a clean structured table' }
   ];
 
   return (

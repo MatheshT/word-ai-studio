@@ -15,8 +15,7 @@ import {
   Check,
   RefreshCw,
   Mic,
-  MicOff,
-  Terminal
+  MicOff
 } from 'lucide-react';
 
 interface Props {
@@ -316,36 +315,48 @@ I have real-time access to your document context. I can write paragraphs, insert
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Suggested prompts / Slash commands */}
+      {/* Suggested prompts / AI Action Chips */}
       <div className="px-3 py-2 bg-gray-50 border-t border-gray-200">
         <div className="flex items-center gap-1 text-[11px] text-gray-500 mb-1.5 font-medium">
-          <Terminal className="w-3 h-3 text-[#185abd]" />
-          <span>Quick Commands:</span>
+          <Sparkles className="w-3 h-3 text-[#185abd]" />
+          <span>AI Action Shortcuts:</span>
         </div>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           <button
-            onClick={() => handleSend('/table 4-column quarterly budget & spending')}
-            className="text-[11px] bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 text-gray-700 px-2 py-0.5 rounded transition-colors"
+            onClick={() => handleSend('Write a complete engineering project document with abstract, methodology, parameter tables, and findings')}
+            className="text-[11px] bg-white border border-blue-200 hover:border-blue-500 hover:bg-blue-50 text-blue-800 px-2.5 py-1 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1"
           >
-            📊 /table
+            <span>✍️</span> Write Project Document
+          </button>
+          <button
+            onClick={() => handleSend('Change this content to make it highly professional, technically rigorous, and impactful')}
+            className="text-[11px] bg-white border border-emerald-200 hover:border-emerald-500 hover:bg-emerald-50 text-emerald-800 px-2.5 py-1 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1"
+          >
+            <span>✏️</span> Change This Content
+          </button>
+          <button
+            onClick={() => handleSend('Add a suitable system architecture process flow block diagram for this project')}
+            className="text-[11px] bg-white border border-purple-200 hover:border-purple-500 hover:bg-purple-50 text-purple-800 px-2.5 py-1 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1"
+          >
+            <span>📊</span> Add Suitable Diagram
+          </button>
+          <button
+            onClick={() => handleSend('Organize this page into standard university engineering format with numbered headings and structured tables')}
+            className="text-[11px] bg-white border border-amber-200 hover:border-amber-500 hover:bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md font-medium shadow-2xs transition-all flex items-center gap-1"
+          >
+            <span>📐</span> Organize This Page
+          </button>
+          <button
+            onClick={() => handleSend('/table 4-column experimental parameters and findings')}
+            className="text-[11px] bg-white border border-gray-200 hover:border-blue-400 hover:bg-gray-50 text-gray-700 px-2 py-0.5 rounded transition-colors"
+          >
+            📋 /table
           </button>
           <button
             onClick={() => handleSend('/summary')}
-            className="text-[11px] bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 text-gray-700 px-2 py-0.5 rounded transition-colors"
+            className="text-[11px] bg-white border border-gray-200 hover:border-blue-400 hover:bg-gray-50 text-gray-700 px-2 py-0.5 rounded transition-colors"
           >
-            📋 /summary
-          </button>
-          <button
-            onClick={() => handleSend('/proofread')}
-            className="text-[11px] bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 text-gray-700 px-2 py-0.5 rounded transition-colors"
-          >
-            ✨ /proofread
-          </button>
-          <button
-            onClick={() => handleSend('/tone executive & persuasive')}
-            className="text-[11px] bg-white border border-gray-200 hover:border-blue-400 hover:bg-blue-50/50 text-gray-700 px-2 py-0.5 rounded transition-colors"
-          >
-            💼 /tone
+            📑 /summary
           </button>
         </div>
       </div>

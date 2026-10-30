@@ -474,64 +474,41 @@ export const DocumentEditor: React.FC<Props> = ({
             width: `${pageWidthNum}px`
           }}
         >
-          {/* Layer 1: Background Physical Paper Sheets (Each page in exact fixed dimensions) */}
-          <div className="absolute top-0 left-0 right-0 pointer-events-none flex flex-col items-center select-none z-0">
-            {Array.from({ length: totalPages }).map((_, pIdx) => (
-              <div
-                key={pIdx}
-                className={`rounded-xs transition-all relative overflow-hidden flex flex-col justify-between shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${borderStyle}`}
-                style={{
-                  width: `${pageWidthNum}px`,
-                  height: `${pageHeightNum}px`,
-                  backgroundColor: pageBgColor,
-                  marginBottom: pIdx < totalPages - 1 ? '32px' : '0px',
-                  paddingTop: `${padTop}px`,
-                  paddingRight: `${padRight}px`,
-                  paddingBottom: `${padBottom}px`,
-                  paddingLeft: `${padLeft}px`
-                }}
-              >
-                {/* Gridlines on this specific page sheet */}
-                {showGridlines && (
-                  <div
-                    className="absolute inset-0 pointer-events-none z-0"
-                    style={{
-                      backgroundImage: isDarkPaper
-                        ? 'linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px)'
-                        : 'linear-gradient(to right, rgba(0, 0, 0, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1px, transparent 1px)',
-                      backgroundSize: '20px 20px',
-                      backgroundPosition: `${padLeft % 20}px ${padTop % 20}px`
-                    }}
-                  />
-                )}
-
-                {/* Watermark on this specific page sheet (only when explicitly enabled) */}
-                {pageSettings.watermark && pageSettings.watermark !== 'none' && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
-                    <span className="text-8xl font-black tracking-widest text-gray-400/15 -rotate-45 uppercase border-8 border-gray-400/15 px-12 py-4 rounded-xl">
-                      {pageSettings.watermark}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Layer 2: Editable ProseMirror Content Layer (Seamlessly flows across the sheets) */}
+          {/* Authentic Word Multi-Page Physical Sheet (Solid Paper with Zero-Gap Collisions) */}
           <div
-            className={`relative z-10 print-page ${isDarkPaper ? 'text-gray-100' : 'text-gray-900'}`}
+            className={`relative z-10 print-page rounded-xs shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${borderStyle} ${
+              isDarkPaper ? 'text-gray-100' : 'text-gray-900'
+            }`}
             style={{
               width: `${pageWidthNum}px`,
               minHeight: `${totalMinHeight}px`,
+              backgroundColor: pageBgColor,
               paddingTop: `${padTop}px`,
               paddingRight: `${padRight}px`,
               paddingBottom: `${padBottom}px`,
               paddingLeft: `${padLeft}px`,
               columnCount: pageSettings.columns || 1,
-              columnGap: '2rem'
+              columnGap: '2rem',
+              backgroundImage: showGridlines
+                ? isDarkPaper
+                  ? 'linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px)'
+                  : 'linear-gradient(to right, rgba(0, 0, 0, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.08) 1px, transparent 1px)'
+                : undefined,
+              backgroundSize: showGridlines ? '20px 20px' : undefined,
+              backgroundPosition: showGridlines ? `${padLeft % 20}px ${padTop % 20}px` : undefined
             }}
           >
+            {/* Watermark overlay across pages */}
+            {pageSettings.watermark && pageSettings.watermark !== 'none' && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden">
+                <span className="text-8xl font-black tracking-widest text-gray-400/15 -rotate-45 uppercase border-8 border-gray-400/15 px-12 py-4 rounded-xl sticky top-1/2 -translate-y-1/2">
+                  {pageSettings.watermark}
+                </span>
+              </div>
+            )}
+
             <div
+              className="relative z-10"
               style={{
                 textIndent: pageSettings.firstLineIndent
                   ? `${pageSettings.firstLineIndent}px`
