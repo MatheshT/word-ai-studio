@@ -53,7 +53,21 @@ import {
   UserCheck,
   PanelTop,
   PanelBottom,
-  Hash
+  Hash,
+  RotateCw,
+  Sun,
+  Contrast,
+  Crop,
+  Square,
+  Trash2,
+  PaintBucket,
+  Grid,
+  Columns,
+  Rows,
+  ArrowUp,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
 import type { PageSettings, PageMargins, PageOrientation } from '../../types';
 
@@ -127,7 +141,7 @@ export const Ribbon: React.FC<Props> = ({
   onOpenTranslateModal
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'home' | 'insert' | 'design' | 'layout' | 'references' | 'mailings' | 'review' | 'view' | 'help' | 'acrobat' | 'copilot'
+    'home' | 'insert' | 'design' | 'layout' | 'references' | 'mailings' | 'review' | 'view' | 'help' | 'acrobat' | 'copilot' | 'pictureFormat' | 'tableDesign' | 'tableLayout'
   >('home');
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -140,6 +154,23 @@ export const Ribbon: React.FC<Props> = ({
   const [showHeaderPicker, setShowHeaderPicker] = useState(false);
   const [showFooterPicker, setShowFooterPicker] = useState(false);
   const [showPageNumPicker, setShowPageNumPicker] = useState(false);
+  const [showCellColorPicker, setShowCellColorPicker] = useState(false);
+
+  const isImageActive = editor?.isActive('image') || false;
+  const isTableActive = editor?.isActive('table') || false;
+
+  React.useEffect(() => {
+    if (!editor) return;
+    const handleSelection = () => {
+      if (editor.isActive('image')) {
+        setActiveTab('pictureFormat');
+      }
+    };
+    editor.on('selectionUpdate', handleSelection);
+    return () => {
+      editor.off('selectionUpdate', handleSelection);
+    };
+  }, [editor]);
   const [tableGrid, setTableGrid] = useState({ rows: 3, cols: 3 });
   const [currentFontSize, setCurrentFontSize] = useState('14');
   const [currentFontFamily, setCurrentFontFamily] = useState('Times New Roman');
@@ -515,6 +546,58 @@ export const Ribbon: React.FC<Props> = ({
               {tab === 'copilot' && '✨ AI Copilot'}
             </button>
           ))}
+
+          {/* Contextual Picture Format Tab (Matches Word Screenshot) */}
+          {(isImageActive || activeTab === 'pictureFormat') && (
+            <button
+              onClick={() => {
+                setActiveTab('pictureFormat');
+                setIsFileMenuOpen(false);
+              }}
+              className={`px-3 py-1 font-semibold rounded-xs transition-colors flex items-center gap-1.5 ${
+                activeTab === 'pictureFormat'
+                  ? 'bg-[#1e3a5f] text-blue-300 font-bold border-b-2 border-blue-400 shadow-sm'
+                  : 'text-blue-400 hover:bg-[#1e293b] hover:text-blue-300'
+              }`}
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+              Picture Format
+            </button>
+          )}
+
+          {/* Contextual Table Design & Layout Tabs */}
+          {(isTableActive || activeTab === 'tableDesign' || activeTab === 'tableLayout') && (
+            <>
+              <button
+                onClick={() => {
+                  setActiveTab('tableDesign');
+                  setIsFileMenuOpen(false);
+                }}
+                className={`px-3 py-1 font-semibold rounded-xs transition-colors flex items-center gap-1.5 ${
+                  activeTab === 'tableDesign'
+                    ? 'bg-[#064e3b] text-emerald-300 font-bold border-b-2 border-emerald-400 shadow-sm'
+                    : 'text-emerald-400 hover:bg-[#064e3b]/50 hover:text-emerald-300'
+                }`}
+              >
+                <TableIcon className="w-3.5 h-3.5" />
+                Table Design
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('tableLayout');
+                  setIsFileMenuOpen(false);
+                }}
+                className={`px-3 py-1 font-semibold rounded-xs transition-colors flex items-center gap-1.5 ${
+                  activeTab === 'tableLayout'
+                    ? 'bg-[#134e4a] text-teal-300 font-bold border-b-2 border-teal-400 shadow-sm'
+                    : 'text-teal-400 hover:bg-[#134e4a]/50 hover:text-teal-300'
+                }`}
+              >
+                <Grid className="w-3.5 h-3.5" />
+                Table Layout
+              </button>
+            </>
+          )}
         </div>
 
         {/* Center: Title */}
@@ -1634,6 +1717,490 @@ export const Ribbon: React.FC<Props> = ({
               <Settings className="w-4 h-4 text-gray-400" />
               <span className="text-xs">AI Settings</span>
             </button>
+          </div>
+        )}
+
+        {/* ======================= 11. PICTURE FORMAT TAB (MATCHES SCREENSHOT) ======================= */}
+        {activeTab === 'pictureFormat' && (
+          <div className="flex items-center gap-2 overflow-x-auto py-0.5">
+            {/* Adjust Group */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    editor.chain().focus().updateAttributes('image', {
+                      filter: 'brightness(130%) contrast(105%)'
+                    }).run();
+                  }}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-amber-400"
+                  title="Corrections: High Brightness"
+                >
+                  <Sun className="w-4 h-4" />
+                  <span className="text-[10px]">Brightness</span>
+                </button>
+                <button
+                  onClick={() => {
+                    editor.chain().focus().updateAttributes('image', {
+                      filter: 'contrast(150%)'
+                    }).run();
+                  }}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-blue-400"
+                  title="Corrections: High Contrast"
+                >
+                  <Contrast className="w-4 h-4" />
+                  <span className="text-[10px]">Contrast</span>
+                </button>
+                <div className="flex flex-col gap-0.5">
+                  <button
+                    onClick={() => {
+                      editor.chain().focus().updateAttributes('image', {
+                        filter: 'grayscale(100%)'
+                      }).run();
+                    }}
+                    className="px-1.5 py-0.5 text-[10px] hover:bg-[#333333] rounded text-gray-300 text-left"
+                    title="Grayscale"
+                  >
+                    B&W
+                  </button>
+                  <button
+                    onClick={() => {
+                      editor.chain().focus().updateAttributes('image', {
+                        filter: 'sepia(80%)'
+                      }).run();
+                    }}
+                    className="px-1.5 py-0.5 text-[10px] hover:bg-[#333333] rounded text-amber-300 text-left"
+                    title="Sepia"
+                  >
+                    Sepia
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    editor.chain().focus().updateAttributes('image', {
+                      filter: '',
+                      frameStyle: 'none',
+                      width: null,
+                      height: null,
+                      alignment: 'center'
+                    }).run();
+                  }}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-rose-400 ml-1"
+                  title="Reset Picture to Default"
+                >
+                  <RotateCw className="w-4 h-4" />
+                  <span className="text-[10px]">Reset</span>
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Adjust</span>
+            </div>
+
+            {/* Picture Styles / Frames Gallery */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1.5">
+                {/* None */}
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { frameStyle: 'none' }).run()}
+                  className="w-8 h-8 rounded border border-gray-600 hover:border-blue-400 bg-[#333333] flex items-center justify-center text-[10px] text-gray-300 transition-transform hover:scale-105"
+                  title="None / Borderless"
+                >
+                  None
+                </button>
+
+                {/* Simple White Frame */}
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { frameStyle: 'simple-frame' }).run()}
+                  className="w-8 h-8 rounded border-2 border-white bg-blue-900/40 shadow-sm flex items-center justify-center text-[9px] text-white font-bold transition-transform hover:scale-105"
+                  title="Simple White Frame"
+                >
+                  Frame
+                </button>
+
+                {/* Rounded Corners */}
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { frameStyle: 'rounded' }).run()}
+                  className="w-8 h-8 rounded-lg border border-gray-500 bg-[#333333] flex items-center justify-center text-[9px] text-gray-200 transition-transform hover:scale-105"
+                  title="Rounded Corners"
+                >
+                  Round
+                </button>
+
+                {/* Circle / Oval */}
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { frameStyle: 'circle' }).run()}
+                  className="w-8 h-8 rounded-full border-2 border-blue-400 bg-blue-900/40 flex items-center justify-center text-[9px] text-blue-300 font-bold transition-transform hover:scale-105"
+                  title="Circle / Oval"
+                >
+                  Oval
+                </button>
+
+                {/* Drop Shadow */}
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { frameStyle: 'shadow' }).run()}
+                  className="w-8 h-8 rounded border border-gray-600 bg-gray-700 shadow-xl flex items-center justify-center text-[9px] text-gray-200 transition-transform hover:scale-105"
+                  title="Drop Shadow"
+                >
+                  Shadow
+                </button>
+
+                {/* Metal Frame */}
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { frameStyle: 'metal' }).run()}
+                  className="w-8 h-8 rounded border-4 border-slate-300 bg-slate-800 flex items-center justify-center text-[9px] text-slate-200 transition-transform hover:scale-105"
+                  title="Metal Frame"
+                >
+                  Metal
+                </button>
+
+                {/* Soft Edge Glow */}
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { frameStyle: 'soft-edge' }).run()}
+                  className="w-8 h-8 rounded-md border border-cyan-400/50 bg-cyan-900/30 shadow-[0_0_8px_rgba(6,182,212,0.6)] flex items-center justify-center text-[9px] text-cyan-300 transition-transform hover:scale-105"
+                  title="Soft Edge Glow"
+                >
+                  Glow
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Picture Styles</span>
+            </div>
+
+            {/* Arrange & Wrap Text */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { alignment: 'center' }).run()}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-blue-400"
+                  title="In Line / Center"
+                >
+                  <AlignCenter className="w-4 h-4" />
+                  <span className="text-[10px]">Center</span>
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { alignment: 'float-left' }).run()}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-emerald-400"
+                  title="Wrap Text: Float Left"
+                >
+                  <AlignLeft className="w-4 h-4" />
+                  <span className="text-[10px]">Wrap L</span>
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { alignment: 'float-right' }).run()}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-purple-400"
+                  title="Wrap Text: Float Right"
+                >
+                  <AlignRight className="w-4 h-4" />
+                  <span className="text-[10px]">Wrap R</span>
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Arrange & Wrap</span>
+            </div>
+
+            {/* Size & Dimensions */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { width: '25%' }).run()}
+                  className="px-1.5 py-1 text-xs hover:bg-[#333333] rounded text-gray-200 border border-gray-600"
+                  title="25% Width"
+                >
+                  25%
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { width: '50%' }).run()}
+                  className="px-1.5 py-1 text-xs hover:bg-[#333333] rounded text-gray-200 border border-gray-600"
+                  title="50% Width"
+                >
+                  50%
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { width: '75%' }).run()}
+                  className="px-1.5 py-1 text-xs hover:bg-[#333333] rounded text-gray-200 border border-gray-600"
+                  title="75% Width"
+                >
+                  75%
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { width: '100%' }).run()}
+                  className="px-1.5 py-1 text-xs hover:bg-[#333333] rounded text-gray-200 border border-gray-600"
+                  title="100% Full Width"
+                >
+                  100%
+                </button>
+                <button
+                  onClick={() => {
+                    const customWidth = prompt('Enter Image Width (e.g. 350px, 60%, 450px):', '400px');
+                    if (customWidth) {
+                      editor.chain().focus().updateAttributes('image', { width: customWidth }).run();
+                    }
+                  }}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-cyan-400"
+                  title="Custom Image Width"
+                >
+                  <Crop className="w-4 h-4" />
+                  <span className="text-[10px]">Custom</span>
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Size</span>
+            </div>
+
+            {/* Delete Picture */}
+            <div className="flex flex-col justify-between pr-2.5">
+              <button
+                onClick={() => editor.chain().focus().deleteSelection().run()}
+                className="p-1 px-2.5 hover:bg-red-500/20 text-red-400 rounded flex flex-col items-center transition-colors"
+                title="Delete Selected Picture"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="text-[10px]">Delete</span>
+              </button>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Remove</span>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= 12. TABLE DESIGN TAB ======================= */}
+        {activeTab === 'tableDesign' && (
+          <div className="flex items-center gap-2 overflow-x-auto py-0.5">
+            {/* Table Style Options */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex flex-col gap-1 text-xs text-gray-200">
+                <button
+                  onClick={() => editor.chain().focus().toggleHeaderRow().run()}
+                  className="px-2 py-0.5 rounded hover:bg-[#333333] text-left flex items-center gap-1.5"
+                >
+                  <span className="w-3 h-3 rounded-xs bg-blue-500 flex items-center justify-center text-[9px] text-white">✓</span>
+                  Header Row
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().toggleHeaderColumn().run()}
+                  className="px-2 py-0.5 rounded hover:bg-[#333333] text-left flex items-center gap-1.5"
+                >
+                  <span className="w-3 h-3 rounded-xs bg-blue-500 flex items-center justify-center text-[9px] text-white">✓</span>
+                  First Column
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Table Options</span>
+            </div>
+
+            {/* Table Styles Gallery */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('table', { tableStyle: 'default' }).run()}
+                  className="px-2.5 py-1.5 border border-gray-600 rounded bg-[#2b2b2b] hover:border-blue-400 text-xs text-gray-200 font-medium transition-transform hover:scale-105"
+                  title="Plain Grid Table"
+                >
+                  Plain Grid
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('table', { tableStyle: 'blue-header' }).run()}
+                  className="px-2.5 py-1.5 border-2 border-blue-500 rounded bg-blue-900/40 hover:border-blue-400 text-xs text-blue-200 font-bold transition-transform hover:scale-105"
+                  title="Accent Blue Header Table"
+                >
+                  Blue Header
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('table', { tableStyle: 'dark-header' }).run()}
+                  className="px-2.5 py-1.5 border border-slate-500 rounded bg-slate-800 hover:border-slate-300 text-xs text-slate-200 font-bold transition-transform hover:scale-105"
+                  title="Dark Slate Header Table"
+                >
+                  Dark Slate
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('table', { tableStyle: 'green-header' }).run()}
+                  className="px-2.5 py-1.5 border-2 border-emerald-500 rounded bg-emerald-900/40 hover:border-emerald-400 text-xs text-emerald-200 font-bold transition-transform hover:scale-105"
+                  title="Emerald Green Engineering Table"
+                >
+                  Engineering
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Table Styles</span>
+            </div>
+
+            {/* Cell Shading / Background Color */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a] relative">
+              <button
+                onClick={() => setShowCellColorPicker(!showCellColorPicker)}
+                className="p-1 px-2.5 hover:bg-[#333333] rounded flex flex-col items-center text-amber-400"
+                title="Cell Shading Color"
+              >
+                <PaintBucket className="w-4 h-4" />
+                <span className="text-[10px]">Shading</span>
+              </button>
+              {showCellColorPicker && (
+                <div className="absolute top-full left-0 mt-1 bg-[#252526] border border-[#3e3e42] shadow-2xl rounded p-2 z-50 w-44 text-gray-200">
+                  <div className="text-xs font-semibold px-1 mb-1">Cell Color</div>
+                  <div className="grid grid-cols-5 gap-1.5 mb-1.5">
+                    {[
+                      { name: 'White', color: '#ffffff' },
+                      { name: 'Light Gray', color: '#f3f4f6' },
+                      { name: 'Soft Blue', color: '#dbeafe' },
+                      { name: 'Soft Yellow', color: '#fef9c3' },
+                      { name: 'Soft Green', color: '#dcfce7' },
+                      { name: 'Soft Red', color: '#fee2e2' },
+                      { name: 'Purple', color: '#f3e8ff' },
+                      { name: 'Slate', color: '#334155' },
+                      { name: 'Dark Navy', color: '#1e3a8a' },
+                      { name: 'None', color: '' }
+                    ].map((c) => (
+                      <div
+                        key={c.name}
+                        onClick={() => {
+                          editor.chain().focus().updateAttributes('tableCell', { backgroundColor: c.color }).run();
+                          setShowCellColorPicker(false);
+                        }}
+                        className="w-6 h-6 rounded cursor-pointer border border-gray-600 hover:scale-110 transition-transform"
+                        style={{ backgroundColor: c.color || 'transparent' }}
+                        title={c.name}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => {
+                      editor.chain().focus().updateAttributes('tableCell', { backgroundColor: null }).run();
+                      setShowCellColorPicker(false);
+                    }}
+                    className="w-full text-center py-1 text-[11px] text-gray-300 hover:bg-[#333333] rounded border border-gray-600"
+                  >
+                    No Color
+                  </button>
+                </div>
+              )}
+              <span className="text-[10px] text-gray-400 text-center font-normal">Shading</span>
+            </div>
+
+            {/* Delete Table */}
+            <div className="flex flex-col justify-between pr-2.5">
+              <button
+                onClick={() => editor.chain().focus().deleteTable().run()}
+                className="p-1 px-2.5 hover:bg-red-500/20 text-red-400 rounded flex flex-col items-center transition-colors"
+                title="Delete Table"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span className="text-[10px]">Delete Table</span>
+              </button>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Remove</span>
+            </div>
+          </div>
+        )}
+
+        {/* ======================= 13. TABLE LAYOUT TAB ======================= */}
+        {activeTab === 'tableLayout' && (
+          <div className="flex items-center gap-2 overflow-x-auto py-0.5">
+            {/* Rows & Columns Group */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => editor.chain().focus().addRowBefore().run()}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-blue-400"
+                  title="Insert Row Above"
+                >
+                  <ArrowUp className="w-4 h-4" />
+                  <span className="text-[10px]">Row Above</span>
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().addRowAfter().run()}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-blue-400"
+                  title="Insert Row Below"
+                >
+                  <ArrowDown className="w-4 h-4" />
+                  <span className="text-[10px]">Row Below</span>
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().addColumnBefore().run()}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-emerald-400"
+                  title="Insert Column Left"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="text-[10px]">Col Left</span>
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().addColumnAfter().run()}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-emerald-400"
+                  title="Insert Column Right"
+                >
+                  <ArrowRight className="w-4 h-4" />
+                  <span className="text-[10px]">Col Right</span>
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Rows & Columns</span>
+            </div>
+
+            {/* Delete Group */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => editor.chain().focus().deleteRow().run()}
+                  className="p-1 px-2 hover:bg-red-500/20 text-red-400 rounded flex flex-col items-center"
+                  title="Delete Row"
+                >
+                  <Rows className="w-4 h-4" />
+                  <span className="text-[10px]">Del Row</span>
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().deleteColumn().run()}
+                  className="p-1 px-2 hover:bg-red-500/20 text-red-400 rounded flex flex-col items-center"
+                  title="Delete Column"
+                >
+                  <Columns className="w-4 h-4" />
+                  <span className="text-[10px]">Del Col</span>
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Delete</span>
+            </div>
+
+            {/* Merge & Split */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => editor.chain().focus().mergeCells().run()}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-amber-400"
+                  title="Merge Selected Cells"
+                >
+                  <Square className="w-4 h-4" />
+                  <span className="text-[10px]">Merge</span>
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().splitCell().run()}
+                  className="p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center text-indigo-400"
+                  title="Split Cells"
+                >
+                  <Grid className="w-4 h-4" />
+                  <span className="text-[10px]">Split</span>
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Merge & Split</span>
+            </div>
+
+            {/* Cell Alignment */}
+            <div className="flex flex-col justify-between pr-2.5">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => editor.chain().focus().setTextAlign('left').run()}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-gray-300"
+                  title="Align Text Left"
+                >
+                  <AlignLeft className="w-4 h-4" />
+                  <span className="text-[10px]">Left</span>
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().setTextAlign('center').run()}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-gray-300"
+                  title="Align Text Center"
+                >
+                  <AlignCenter className="w-4 h-4" />
+                  <span className="text-[10px]">Center</span>
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().setTextAlign('right').run()}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-gray-300"
+                  title="Align Text Right"
+                >
+                  <AlignRight className="w-4 h-4" />
+                  <span className="text-[10px]">Right</span>
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Alignment</span>
+            </div>
           </div>
         )}
       </div>

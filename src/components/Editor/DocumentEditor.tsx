@@ -114,6 +114,94 @@ const LineHeight = Extension.create({
   }
 });
 
+// Custom Image extension supporting resizing, frames, alignment, and filters
+const CustomImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      width: {
+        default: null,
+        parseHTML: (element) => element.getAttribute('width') || element.style.width,
+        renderHTML: (attributes) => {
+          if (!attributes.width) return {};
+          return {
+            width: attributes.width,
+            style: `width: ${attributes.width}`
+          };
+        }
+      },
+      height: {
+        default: null,
+        parseHTML: (element) => element.getAttribute('height') || element.style.height,
+        renderHTML: (attributes) => {
+          if (!attributes.height) return {};
+          return {
+            height: attributes.height,
+            style: `height: ${attributes.height}`
+          };
+        }
+      },
+      alignment: {
+        default: 'center',
+        parseHTML: (element) => element.getAttribute('data-align') || 'center',
+        renderHTML: (attributes) => {
+          return { 'data-align': attributes.alignment || 'center' };
+        }
+      },
+      frameStyle: {
+        default: 'none',
+        parseHTML: (element) => element.getAttribute('data-frame') || 'none',
+        renderHTML: (attributes) => {
+          return { 'data-frame': attributes.frameStyle || 'none' };
+        }
+      },
+      filter: {
+        default: '',
+        parseHTML: (element) => element.style.filter || '',
+        renderHTML: (attributes) => {
+          if (!attributes.filter) return {};
+          return { style: `filter: ${attributes.filter}` };
+        }
+      }
+    };
+  }
+});
+
+// Custom Table extension supporting styles
+const CustomTable = Table.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      tableStyle: {
+        default: 'default',
+        parseHTML: (element) => element.getAttribute('data-style') || 'default',
+        renderHTML: (attributes) => {
+          return { 'data-style': attributes.tableStyle || 'default' };
+        }
+      }
+    };
+  }
+});
+
+// Custom TableCell extension supporting background color shading
+const CustomTableCell = TableCell.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      backgroundColor: {
+        default: null,
+        parseHTML: (element) => element.style.backgroundColor,
+        renderHTML: (attributes) => {
+          if (!attributes.backgroundColor) return {};
+          return {
+            style: `background-color: ${attributes.backgroundColor}`
+          };
+        }
+      }
+    };
+  }
+});
+
 interface Props {
   initialContent?: string;
   documentTitle?: string;
@@ -183,14 +271,14 @@ export const DocumentEditor: React.FC<Props> = ({
       LineHeight,
       Color,
       Highlight.configure({ multicolor: true }),
-      Table.configure({
+      CustomTable.configure({
         resizable: true
       }),
       TableRow,
       TableHeader,
-      TableCell,
-      Image.configure({
-        inline: true,
+      CustomTableCell,
+      CustomImage.configure({
+        inline: false,
         allowBase64: true
       }),
       Link.configure({
