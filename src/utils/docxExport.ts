@@ -1,6 +1,45 @@
 import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, Header, Footer, AlignmentType } from 'docx';
 import { saveAs } from 'file-saver';
 
+/**
+ * Saves a file by prompting the native Windows / OS File Manager (File Explorer) dialog,
+ * allowing the user to choose their exact folder location and file name.
+ * Seamlessly falls back to file-saver download for browsers without showSaveFilePicker.
+ */
+export async function saveToFileManager(
+  blob: Blob,
+  suggestedName: string,
+  types?: { description: string; accept: Record<string, string[]> }[]
+) {
+  if (typeof window !== 'undefined' && 'showSaveFilePicker' in window) {
+    try {
+      const handle = await (window as any).showSaveFilePicker({
+        suggestedName,
+        types: types || [
+          {
+            description: 'Microsoft Word Document (*.docx)',
+            accept: {
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+            }
+          }
+        ]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      return true;
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        return false;
+      }
+      console.warn('File picker fallback triggered:', err);
+    }
+  }
+
+  saveAs(blob, suggestedName);
+  return true;
+}
+
 export async function exportToDocx(htmlContent: string, fileName: string = 'document.docx', pageSettings?: any) {
   // Parse HTML content into DOM elements
   const parser = new DOMParser();
@@ -159,7 +198,15 @@ export async function exportToDocx(htmlContent: string, fileName: string = 'docu
   });
 
   const blob = await Packer.toBlob(wordDoc);
-  saveAs(blob, fileName.endsWith('.docx') ? fileName : `${fileName}.docx`);
+  const targetName = fileName.endsWith('.docx') ? fileName : `${fileName}.docx`;
+  await saveToFileManager(blob, targetName, [
+    {
+      description: 'Microsoft Word Document (*.docx)',
+      accept: {
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+      }
+    }
+  ]);
 }
 
 function parseInlineElements(node: Element): TextRun[] {
@@ -193,7 +240,7 @@ function parseInlineElements(node: Element): TextRun[] {
   return runs;
 }
 
-export function exportToHtml(htmlContent: string, fileName: string = 'document.html') {
+export async function exportToHtml(htmlContent: string, fileName: string = 'document.html') {
   const fullHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -221,10 +268,16 @@ ${htmlContent}
 </html>`;
 
   const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
-  saveAs(blob, fileName.endsWith('.html') ? fileName : `${fileName}.html`);
+  const targetName = fileName.endsWith('.html') ? fileName : `${fileName}.html`;
+  await saveToFileManager(blob, targetName, [
+    {
+      description: 'HTML Document (*.html)',
+      accept: { 'text/html': ['.html', '.htm'] }
+    }
+  ]);
 }
 
-export function exportToMarkdown(htmlContent: string, fileName: string = 'document.md') {
+export async function exportToMarkdown(htmlContent: string, fileName: string = 'document.md') {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, 'text/html');
   
@@ -253,13 +306,25 @@ export function exportToMarkdown(htmlContent: string, fileName: string = 'docume
   }
 
   const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
-  saveAs(blob, fileName.endsWith('.md') ? fileName : `${fileName}.md`);
+  const targetName = fileName.endsWith('.md') ? fileName : `${fileName}.md`;
+  await saveToFileManager(blob, targetName, [
+    {
+      description: 'Markdown File (*.md)',
+      accept: { 'text/markdown': ['.md'] }
+    }
+  ]);
 }
 
-export function exportToTxt(htmlContent: string, fileName: string = 'document.txt') {
+export async function exportToTxt(htmlContent: string, fileName: string = 'document.txt') {
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, 'text/html');
   const text = doc.body.textContent || '';
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  saveAs(blob, fileName.endsWith('.txt') ? fileName : `${fileName}.txt`);
+  const targetName = fileName.endsWith('.txt') ? fileName : `${fileName}.txt`;
+  await saveToFileManager(blob, targetName, [
+    {
+      description: 'Plain Text File (*.txt)',
+      accept: { 'text/plain': ['.txt'] }
+    }
+  ]);
 }
