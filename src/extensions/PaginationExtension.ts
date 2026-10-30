@@ -98,9 +98,9 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
             if (!editorView || !editorView.dom || editorView.isDestroyed) return;
 
             const opts = extension.options;
+            // Usable content area height on one page
             const usableHeight = Math.max(300, opts.pageHeight - opts.padTop - opts.padBottom);
-            const dom = editorView.dom as HTMLElement;
-            const children = Array.from(dom.children) as HTMLElement[];
+            const doc = editorView.state.doc;
 
             let accumulatedHeight = 0;
             let pageNumber = 1;
@@ -111,29 +111,21 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
               spacerHeight: number;
             }[] = [];
 
-            for (let i = 0; i < children.length; i++) {
-              const child = children[i];
-              if (
-                child.classList.contains('word-auto-page-break') ||
-                child.getAttribute('data-type') === 'page-break-widget'
-              ) {
-                continue;
-              }
+            // Filter out existing pagination widgets to measure clean ProseMirror block elements
+            const nonWidgetChildren = Array.from(editorView.dom.children).filter(
+              (el: any) =>
+                !el.classList.contains('word-auto-page-break') &&
+                el.getAttribute('data-type') !== 'page-break-widget'
+            );
 
-              const isManualBreak =
-                child.getAttribute('data-type') === 'page-break' ||
-                child.classList.contains('word-manual-page-break');
+            let currentPos = 0;
+            for (let i = 0; i < doc.childCount; i++) {
+              const node = doc.child(i);
+              const nodePos = currentPos;
+              currentPos += node.nodeSize;
 
-              let nodePos = -1;
-              try {
-                nodePos = editorView.posAtDOM(child, 0);
-              } catch {
-                continue;
-              }
-
-              if (nodePos < 0) continue;
-
-              if (isManualBreak) {
+              // Manual Page Break node
+              if (node.type.name === 'pageBreak') {
                 const unusedHeight = Math.max(0, usableHeight - accumulatedHeight);
                 const spacerHeight = unusedHeight + opts.padBottom + 32 + opts.padTop;
                 pageNumber++;
@@ -147,12 +139,19 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
                 continue;
               }
 
-              const style = window.getComputedStyle(child);
-              const marginTop = parseFloat(style.marginTop) || 0;
-              const marginBottom = parseFloat(style.marginBottom) || 0;
-              const childHeight = (child.offsetHeight || 24) + marginTop + marginBottom;
+              // Measure the rendered DOM element corresponding to this block
+              const domNode = (nonWidgetChildren[i] as HTMLElement) || null;
+              let nodeHeight = 24;
+              if (domNode) {
+                const style = window.getComputedStyle(domNode);
+                const marginTop = parseFloat(style.marginTop) || 0;
+                const marginBottom = parseFloat(style.marginBottom) || 0;
+                nodeHeight = (domNode.offsetHeight || 24) + marginTop + marginBottom;
+              }
 
-              if (accumulatedHeight + childHeight > usableHeight && accumulatedHeight > 30) {
+              // If block overflows the remaining usable space on the page, move the entire block to next page!
+              // Uses a safe margin threshold so tables and paragraphs never bleed into the desk gap
+              if (accumulatedHeight + nodeHeight > usableHeight && accumulatedHeight > 20) {
                 const unusedHeight = Math.max(0, usableHeight - accumulatedHeight);
                 const spacerHeight = unusedHeight + opts.padBottom + 32 + opts.padTop;
                 pageNumber++;
@@ -162,9 +161,9 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
                   unusedHeight,
                   spacerHeight
                 });
-                accumulatedHeight = childHeight;
+                accumulatedHeight = nodeHeight;
               } else {
-                accumulatedHeight += childHeight;
+                accumulatedHeight += nodeHeight;
               }
             }
 
@@ -195,8 +194,8 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
               breakPositions.some(
                 (b, idx) =>
                   b.pos !== lastBreaks[idx]?.pos ||
-                  b.unusedHeight !== lastBreaks[idx]?.unusedHeight ||
-                  b.spacerHeight !== lastBreaks[idx]?.spacerHeight
+                  Math.abs(b.unusedHeight - (lastBreaks[idx]?.unusedHeight || 0)) > 2 ||
+                  Math.abs(b.spacerHeight - (lastBreaks[idx]?.spacerHeight || 0)) > 2
               );
 
             if (!hasChanged) {
@@ -211,7 +210,6 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
 
             // Build Widget Decorations with pixel-perfect spacers
             const decorations: Decoration[] = [];
-            const doc = editorView.state.doc;
 
             for (const bp of breakPositions) {
               if (bp.pos < 0 || bp.pos > doc.content.size) continue;
@@ -310,8 +308,10 @@ export const PaginationExtension = Extension.create<PaginationOptions>({
             editorView.dispatch(tr);
           };
 
-          // Initial calculation after mount
-          setTimeout(() => calculatePageBreaks(true), 150);
+          // Run calculations after layout settles
+          setTimeout(() => calculatePageBreaks(true), 50);
+          setTimeout(() => calculatePageBreaks(true), 250);
+          setTimeout(() => calculatePageBreaks(true), 600);
 
           return {
             update(view, prevState) {
