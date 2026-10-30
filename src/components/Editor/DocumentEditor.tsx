@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useEditor, EditorContent, Extension } from '@tiptap/react';
+import { useEditor, EditorContent, Extension, ReactNodeViewRenderer } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
@@ -20,6 +20,7 @@ import type { PageSettings, DocumentStats } from '../../types';
 import { WordRulerContainer } from './WordRuler';
 import { PageBreak } from '../../extensions/PageBreak';
 import { PaginationExtension } from '../../extensions/PaginationExtension';
+import { ResizableImageNode } from './ResizableImageNode';
 
 // Custom FontFamily extension
 const FontFamily = Extension.create({
@@ -114,30 +115,29 @@ const LineHeight = Extension.create({
   }
 });
 
-// Custom Image extension supporting resizing, frames, alignment, and filters
+// Custom Image extension supporting resizing, frames, alignment, wrapping, and filters
 const CustomImage = Image.extend({
   addAttributes() {
     return {
       ...this.parent?.(),
       width: {
-        default: null,
+        default: 300,
         parseHTML: (element) => element.getAttribute('width') || element.style.width,
         renderHTML: (attributes) => {
           if (!attributes.width) return {};
           return {
             width: attributes.width,
-            style: `width: ${attributes.width}`
+            style: `width: ${attributes.width}px`
           };
         }
       },
       height: {
-        default: null,
+        default: 'auto',
         parseHTML: (element) => element.getAttribute('height') || element.style.height,
         renderHTML: (attributes) => {
           if (!attributes.height) return {};
           return {
-            height: attributes.height,
-            style: `height: ${attributes.height}`
+            height: attributes.height
           };
         }
       },
@@ -146,6 +146,13 @@ const CustomImage = Image.extend({
         parseHTML: (element) => element.getAttribute('data-align') || 'center',
         renderHTML: (attributes) => {
           return { 'data-align': attributes.alignment || 'center' };
+        }
+      },
+      wrapMode: {
+        default: 'inline',
+        parseHTML: (element) => element.getAttribute('data-wrap') || 'inline',
+        renderHTML: (attributes) => {
+          return { 'data-wrap': attributes.wrapMode || 'inline' };
         }
       },
       frameStyle: {
@@ -162,8 +169,32 @@ const CustomImage = Image.extend({
           if (!attributes.filter) return {};
           return { style: `filter: ${attributes.filter}` };
         }
+      },
+      rotation: {
+        default: 0,
+        parseHTML: (element) => parseInt(element.getAttribute('data-rotate') || '0', 10),
+        renderHTML: (attributes) => {
+          return { 'data-rotate': attributes.rotation || 0 };
+        }
+      },
+      xOffset: {
+        default: 0,
+        parseHTML: (element) => parseInt(element.getAttribute('data-x') || '0', 10),
+        renderHTML: (attributes) => {
+          return { 'data-x': attributes.xOffset || 0 };
+        }
+      },
+      yOffset: {
+        default: 0,
+        parseHTML: (element) => parseInt(element.getAttribute('data-y') || '0', 10),
+        renderHTML: (attributes) => {
+          return { 'data-y': attributes.yOffset || 0 };
+        }
       }
     };
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(ResizableImageNode);
   }
 });
 

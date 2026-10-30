@@ -55,6 +55,10 @@ import {
   PanelBottom,
   Hash,
   RotateCw,
+  RotateCcw,
+  FlipHorizontal,
+  FlipVertical,
+  Move,
   Sun,
   Contrast,
   Crop,
@@ -1863,35 +1867,211 @@ export const Ribbon: React.FC<Props> = ({
               <span className="text-[10px] text-gray-400 text-center font-normal">Picture Styles</span>
             </div>
 
-            {/* Arrange & Wrap Text */}
+            {/* Position & Move */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1">
+                {/* Nudge arrows */}
+                <div className="grid grid-cols-3 gap-0.5 w-16">
+                  <div />
+                  <button
+                    onClick={() => {
+                      const cur = editor.getAttributes('image');
+                      editor.chain().focus().updateAttributes('image', {
+                        yOffset: (cur.yOffset || 0) - 20
+                      }).run();
+                    }}
+                    className="p-1 bg-[#333333] hover:bg-blue-600 rounded flex items-center justify-center text-gray-200"
+                    title="Nudge Up 20px"
+                  >
+                    <ArrowUp className="w-3 h-3" />
+                  </button>
+                  <div />
+                  <button
+                    onClick={() => {
+                      const cur = editor.getAttributes('image');
+                      editor.chain().focus().updateAttributes('image', {
+                        xOffset: (cur.xOffset || 0) - 20
+                      }).run();
+                    }}
+                    className="p-1 bg-[#333333] hover:bg-blue-600 rounded flex items-center justify-center text-gray-200"
+                    title="Nudge Left 20px"
+                  >
+                    <ArrowLeft className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      editor.chain().focus().updateAttributes('image', {
+                        xOffset: 0,
+                        yOffset: 0
+                      }).run();
+                    }}
+                    className="p-1 bg-[#333333] hover:bg-amber-600 rounded flex items-center justify-center text-amber-300"
+                    title="Center / Reset Position"
+                  >
+                    <Move className="w-3 h-3" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      const cur = editor.getAttributes('image');
+                      editor.chain().focus().updateAttributes('image', {
+                        xOffset: (cur.xOffset || 0) + 20
+                      }).run();
+                    }}
+                    className="p-1 bg-[#333333] hover:bg-blue-600 rounded flex items-center justify-center text-gray-200"
+                    title="Nudge Right 20px"
+                  >
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                  <div />
+                  <button
+                    onClick={() => {
+                      const cur = editor.getAttributes('image');
+                      editor.chain().focus().updateAttributes('image', {
+                        yOffset: (cur.yOffset || 0) + 20
+                      }).run();
+                    }}
+                    className="p-1 bg-[#333333] hover:bg-blue-600 rounded flex items-center justify-center text-gray-200"
+                    title="Nudge Down 20px"
+                  >
+                    <ArrowDown className="w-3 h-3" />
+                  </button>
+                  <div />
+                </div>
+
+                {/* Alignment */}
+                <div className="flex flex-col gap-0.5 ml-1">
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      onClick={() => editor.chain().focus().updateAttributes('image', { alignment: 'left', xOffset: 0 }).run()}
+                      className="p-1 hover:bg-[#333333] rounded text-gray-300"
+                      title="Align Left"
+                    >
+                      <AlignLeft className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => editor.chain().focus().updateAttributes('image', { alignment: 'center', xOffset: 0 }).run()}
+                      className="p-1 hover:bg-[#333333] rounded text-blue-400"
+                      title="Align Center"
+                    >
+                      <AlignCenter className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => editor.chain().focus().updateAttributes('image', { alignment: 'right', xOffset: 0 }).run()}
+                      className="p-1 hover:bg-[#333333] rounded text-gray-300"
+                      title="Align Right"
+                    >
+                      <AlignRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => editor.chain().focus().updateAttributes('image', { wrapMode: 'infront' }).run()}
+                    className="px-1.5 py-0.5 bg-[#0078d4]/30 hover:bg-[#0078d4] text-[9px] text-blue-200 rounded border border-blue-400/40 text-center"
+                    title="Enable Free Float Mode (Drag anywhere across pages)"
+                  >
+                    Free Float
+                  </button>
+                </div>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Position & Nudge</span>
+            </div>
+
+            {/* Wrap Text Mode */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="grid grid-cols-2 gap-1">
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { wrapMode: 'inline', alignment: 'center' }).run()}
+                  className="px-1.5 py-1 text-[10px] hover:bg-[#333333] rounded text-gray-200 border border-gray-600 text-left"
+                  title="In Line with Text"
+                >
+                  In Line
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { wrapMode: 'square', alignment: 'float-left' }).run()}
+                  className="px-1.5 py-1 text-[10px] hover:bg-[#333333] rounded text-gray-200 border border-gray-600 text-left"
+                  title="Square: Float Left with Text Wrap"
+                >
+                  Square L
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { wrapMode: 'infront' }).run()}
+                  className="px-1.5 py-1 text-[10px] hover:bg-[#0078d4] rounded text-blue-200 border border-blue-500 text-left font-semibold"
+                  title="In Front of Text: Free Floating"
+                >
+                  In Front
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { wrapMode: 'behind' }).run()}
+                  className="px-1.5 py-1 text-[10px] hover:bg-[#333333] rounded text-gray-200 border border-gray-600 text-left"
+                  title="Behind Text"
+                >
+                  Behind
+                </button>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Wrap Text</span>
+            </div>
+
+            {/* Rotate & Flip */}
             <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
               <div className="flex items-center gap-1">
                 <button
-                  onClick={() => editor.chain().focus().updateAttributes('image', { alignment: 'center' }).run()}
-                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-blue-400"
-                  title="In Line / Center"
+                  onClick={() => {
+                    const cur = editor.getAttributes('image');
+                    const next = ((cur.rotation || 0) + 90) % 360;
+                    editor.chain().focus().updateAttributes('image', { rotation: next }).run();
+                  }}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-cyan-400"
+                  title="Rotate Right 90°"
                 >
-                  <AlignCenter className="w-4 h-4" />
-                  <span className="text-[10px]">Center</span>
+                  <RotateCw className="w-4 h-4" />
+                  <span className="text-[10px]">+90°</span>
                 </button>
                 <button
-                  onClick={() => editor.chain().focus().updateAttributes('image', { alignment: 'float-left' }).run()}
-                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-emerald-400"
-                  title="Wrap Text: Float Left"
+                  onClick={() => {
+                    const cur = editor.getAttributes('image');
+                    let next = ((cur.rotation || 0) - 90) % 360;
+                    if (next < 0) next += 360;
+                    editor.chain().focus().updateAttributes('image', { rotation: next }).run();
+                  }}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-cyan-400"
+                  title="Rotate Left 90°"
                 >
-                  <AlignLeft className="w-4 h-4" />
-                  <span className="text-[10px]">Wrap L</span>
+                  <RotateCcw className="w-4 h-4" />
+                  <span className="text-[10px]">-90°</span>
                 </button>
                 <button
-                  onClick={() => editor.chain().focus().updateAttributes('image', { alignment: 'float-right' }).run()}
-                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-purple-400"
-                  title="Wrap Text: Float Right"
+                  onClick={() => {
+                    const cur = editor.getAttributes('image');
+                    const currentFilter = cur.filter || '';
+                    const hasFlip = currentFilter.includes('scaleX(-1)');
+                    const newFilter = hasFlip
+                      ? currentFilter.replace('scaleX(-1)', '').trim()
+                      : `${currentFilter} scaleX(-1)`.trim();
+                    editor.chain().focus().updateAttributes('image', { filter: newFilter }).run();
+                  }}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-indigo-400"
+                  title="Flip Horizontal"
                 >
-                  <AlignRight className="w-4 h-4" />
-                  <span className="text-[10px]">Wrap R</span>
+                  <FlipHorizontal className="w-4 h-4" />
+                  <span className="text-[10px]">Flip H</span>
+                </button>
+                <button
+                  onClick={() => {
+                    const cur = editor.getAttributes('image');
+                    const currentFilter = cur.filter || '';
+                    const hasFlip = currentFilter.includes('scaleY(-1)');
+                    const newFilter = hasFlip
+                      ? currentFilter.replace('scaleY(-1)', '').trim()
+                      : `${currentFilter} scaleY(-1)`.trim();
+                    editor.chain().focus().updateAttributes('image', { filter: newFilter }).run();
+                  }}
+                  className="p-1 px-1.5 hover:bg-[#333333] rounded flex flex-col items-center text-indigo-400"
+                  title="Flip Vertical"
+                >
+                  <FlipVertical className="w-4 h-4" />
+                  <span className="text-[10px]">Flip V</span>
                 </button>
               </div>
-              <span className="text-[10px] text-gray-400 text-center font-normal">Arrange & Wrap</span>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Rotate & Flip</span>
             </div>
 
             {/* Size & Dimensions */}
