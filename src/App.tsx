@@ -108,8 +108,8 @@ export function App() {
   // Document Operations
   const handleSaveDocx = useCallback(() => {
     if (!editor) return;
-    exportToDocx(editor.getHTML(), documentTitle);
-  }, [editor, documentTitle]);
+    exportToDocx(editor.getHTML(), documentTitle, pageSettings);
+  }, [editor, documentTitle, pageSettings]);
 
   const handleExportPdf = useCallback(() => {
     window.print();

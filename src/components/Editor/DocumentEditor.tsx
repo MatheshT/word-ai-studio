@@ -355,6 +355,186 @@ export const DocumentEditor: React.FC<Props> = ({
               <EditorContent editor={editor} />
             </div>
           </div>
+
+          {/* Layer 3: Interactive Header & Footer Overlay across all pages */}
+          <div className="absolute top-0 left-0 right-0 pointer-events-none flex flex-col items-center select-none z-20">
+            {Array.from({ length: totalPages }).map((_, pIdx) => {
+              const hasHeader =
+                pageSettings.showHeader ||
+                (pageSettings.headerText && pageSettings.headerText.trim() !== '') ||
+                pageSettings.pageNumberPosition === 'top-right';
+
+              const hasFooter =
+                pageSettings.showFooter ||
+                (pageSettings.footerText && pageSettings.footerText.trim() !== '') ||
+                (pageSettings.pageNumberPosition &&
+                  pageSettings.pageNumberPosition !== 'none' &&
+                  pageSettings.pageNumberPosition !== 'top-right');
+
+              return (
+                <div
+                  key={pIdx}
+                  className="relative pointer-events-none"
+                  style={{
+                    width: `${pageWidthNum}px`,
+                    height: `${pageHeightNum}px`,
+                    marginBottom: pIdx < totalPages - 1 ? '32px' : '0px'
+                  }}
+                >
+                  {/* Header Bar */}
+                  {hasHeader ? (
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const current = pageSettings.headerText || '';
+                        const newText = prompt(
+                          'Edit Header (leave blank to remove):',
+                          current
+                        );
+                        if (newText !== null) {
+                          onPageSettingsChange?.({
+                            ...pageSettings,
+                            showHeader: newText.trim().length > 0,
+                            headerText: newText
+                          });
+                        }
+                      }}
+                      className={`absolute top-3.5 pointer-events-auto cursor-pointer group flex items-center justify-between text-xs border-b border-transparent hover:border-blue-400 hover:bg-blue-50/10 px-1 py-0.5 rounded transition-all ${
+                        isDarkPaper
+                          ? 'text-gray-400 hover:text-gray-100'
+                          : 'text-gray-500 hover:text-gray-900'
+                      }`}
+                      style={{
+                        left: `${padLeft}px`,
+                        right: `${padRight}px`
+                      }}
+                      title="Header: Click to edit"
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="text-[9px] uppercase font-bold tracking-wider px-1 py-0.2 bg-blue-500/20 text-blue-400 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                          Header
+                        </span>
+                        <span className="truncate font-medium text-[11px] font-sans">
+                          {pageSettings.headerText || 'Header'}
+                        </span>
+                      </div>
+                      {pageSettings.pageNumberPosition === 'top-right' && (
+                        <span className="text-[11px] font-sans ml-auto pl-2 font-medium">
+                          Page {pIdx + 1} of {totalPages}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    /* Word-style hover detector to add header */
+                    <div
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        const text = prompt('Enter Header Text:');
+                        if (text !== null && text.trim().length > 0) {
+                          onPageSettingsChange?.({
+                            ...pageSettings,
+                            showHeader: true,
+                            headerText: text
+                          });
+                        }
+                      }}
+                      className="absolute top-0 left-0 right-0 h-9 pointer-events-auto cursor-pointer group flex items-center justify-center"
+                      title="Double-click to add Header"
+                    >
+                      <span className="text-[10px] text-blue-400 font-medium opacity-0 group-hover:opacity-75 transition-opacity bg-blue-900/30 px-2 py-0.5 rounded border border-blue-400/30">
+                        + Double-click to add Header
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Footer Bar */}
+                  {hasFooter ? (
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const current = pageSettings.footerText || '';
+                        const newText = prompt(
+                          'Edit Footer (leave blank to remove):',
+                          current
+                        );
+                        if (newText !== null) {
+                          onPageSettingsChange?.({
+                            ...pageSettings,
+                            showFooter: newText.trim().length > 0,
+                            footerText: newText
+                          });
+                        }
+                      }}
+                      className={`absolute bottom-3.5 pointer-events-auto cursor-pointer group flex items-center text-xs border-t border-transparent hover:border-blue-400 hover:bg-blue-50/10 px-1 py-0.5 rounded transition-all ${
+                        isDarkPaper
+                          ? 'text-gray-400 hover:text-gray-100'
+                          : 'text-gray-500 hover:text-gray-900'
+                      } ${
+                        pageSettings.pageNumberPosition === 'bottom-center'
+                          ? 'justify-center'
+                          : 'justify-between'
+                      }`}
+                      style={{
+                        left: `${padLeft}px`,
+                        right: `${padRight}px`
+                      }}
+                      title="Footer: Click to edit"
+                    >
+                      {pageSettings.pageNumberPosition === 'bottom-center' ? (
+                        <div className="flex items-center gap-2">
+                          {pageSettings.footerText && (
+                            <span className="text-[11px] font-sans mr-2 truncate">
+                              {pageSettings.footerText} —
+                            </span>
+                          )}
+                          <span className="text-[11px] font-sans font-medium">
+                            - {pIdx + 1} -
+                          </span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2 truncate">
+                            <span className="text-[9px] uppercase font-bold tracking-wider px-1 py-0.2 bg-teal-500/20 text-teal-400 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                              Footer
+                            </span>
+                            <span className="truncate text-[11px] font-sans">
+                              {pageSettings.footerText || ''}
+                            </span>
+                          </div>
+                          {pageSettings.pageNumberPosition === 'bottom-right' && (
+                            <span className="text-[11px] font-sans ml-auto pl-2 font-medium">
+                              Page {pIdx + 1} of {totalPages}
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  ) : (
+                    /* Word-style hover detector to add footer */
+                    <div
+                      onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        const text = prompt('Enter Footer Text:');
+                        if (text !== null && text.trim().length > 0) {
+                          onPageSettingsChange?.({
+                            ...pageSettings,
+                            showFooter: true,
+                            footerText: text
+                          });
+                        }
+                      }}
+                      className="absolute bottom-0 left-0 right-0 h-9 pointer-events-auto cursor-pointer group flex items-center justify-center"
+                      title="Double-click to add Footer"
+                    >
+                      <span className="text-[10px] text-teal-400 font-medium opacity-0 group-hover:opacity-75 transition-opacity bg-teal-900/30 px-2 py-0.5 rounded border border-teal-400/30">
+                        + Double-click to add Footer
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </WordRulerContainer>
     </div>

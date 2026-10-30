@@ -57,6 +57,11 @@ export interface PageSettings {
   pageColor?: string;
   pageBorder?: 'none' | 'box' | 'shadow' | 'double';
   columns?: 1 | 2;
+  headerText?: string;
+  footerText?: string;
+  showHeader?: boolean;
+  showFooter?: boolean;
+  pageNumberPosition?: 'bottom-right' | 'bottom-center' | 'top-right' | 'none';
 }
 
 export interface OutlineItem {

@@ -1,7 +1,7 @@
-import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, Header, Footer, AlignmentType } from 'docx';
 import { saveAs } from 'file-saver';
 
-export async function exportToDocx(htmlContent: string, fileName: string = 'document.docx') {
+export async function exportToDocx(htmlContent: string, fileName: string = 'document.docx', pageSettings?: any) {
   // Parse HTML content into DOM elements
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, 'text/html');
@@ -117,11 +117,42 @@ export async function exportToDocx(htmlContent: string, fileName: string = 'docu
     }
   }
 
+  // Configure headers & footers if present in pageSettings
+  const headers: any = {};
+  if (pageSettings?.showHeader && pageSettings?.headerText) {
+    headers.default = new Header({
+      children: [
+        new Paragraph({
+          children: [new TextRun(pageSettings.headerText)],
+          alignment: AlignmentType.RIGHT
+        })
+      ]
+    });
+  }
+
+  const footers: any = {};
+  if (pageSettings?.showFooter || pageSettings?.pageNumberPosition) {
+    const footerRuns: TextRun[] = [];
+    if (pageSettings?.footerText) {
+      footerRuns.push(new TextRun(pageSettings.footerText));
+    }
+    footers.default = new Footer({
+      children: [
+        new Paragraph({
+          children: footerRuns,
+          alignment: AlignmentType.CENTER
+        })
+      ]
+    });
+  }
+
   // Create docx document
   const wordDoc = new Document({
     sections: [
       {
         properties: {},
+        headers: Object.keys(headers).length > 0 ? headers : undefined,
+        footers: Object.keys(footers).length > 0 ? footers : undefined,
         children: docxElements.length > 0 ? docxElements : [new Paragraph({ text: 'Empty Document' })]
       }
     ]

@@ -50,7 +50,10 @@ import {
   PieChart,
   Stamp,
   Mail,
-  UserCheck
+  UserCheck,
+  PanelTop,
+  PanelBottom,
+  Hash
 } from 'lucide-react';
 import type { PageSettings, PageMargins, PageOrientation } from '../../types';
 
@@ -134,6 +137,9 @@ export const Ribbon: React.FC<Props> = ({
   const [showTablePicker, setShowTablePicker] = useState(false);
   const [showWatermarkPicker, setShowWatermarkPicker] = useState(false);
   const [showPageColorPicker, setShowPageColorPicker] = useState(false);
+  const [showHeaderPicker, setShowHeaderPicker] = useState(false);
+  const [showFooterPicker, setShowFooterPicker] = useState(false);
+  const [showPageNumPicker, setShowPageNumPicker] = useState(false);
   const [tableGrid, setTableGrid] = useState({ rows: 3, cols: 3 });
   const [currentFontSize, setCurrentFontSize] = useState('14');
   const [currentFontFamily, setCurrentFontFamily] = useState('Times New Roman');
@@ -894,6 +900,312 @@ export const Ribbon: React.FC<Props> = ({
                 </button>
               </div>
               <span className="text-[10px] text-gray-400 text-center font-normal">Links & Comments</span>
+            </div>
+
+            {/* Header & Footer */}
+            <div className="flex flex-col justify-between pr-2.5 border-r border-[#3a3a3a]">
+              <div className="flex items-center gap-1">
+                {/* Header Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      setShowHeaderPicker(!showHeaderPicker);
+                      setShowFooterPicker(false);
+                      setShowPageNumPicker(false);
+                    }}
+                    className={`p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center group transition-colors ${
+                      pageSettings.showHeader ? 'text-blue-400 bg-[#2d3748]' : 'text-gray-200 hover:text-white'
+                    }`}
+                    title="Insert or customize page Header"
+                  >
+                    <PanelTop className="w-5 h-5 text-blue-400" />
+                    <span className="text-[10px] flex items-center gap-0.5">
+                      Header <ChevronDown className="w-2.5 h-2.5 opacity-60" />
+                    </span>
+                  </button>
+                  {showHeaderPicker && (
+                    <div className="absolute top-full left-0 mt-1 bg-[#252526] border border-[#3e3e42] shadow-2xl rounded p-2 z-50 w-64 text-gray-200">
+                      <div className="text-xs font-semibold px-2 py-1 border-b border-[#3e3e42] mb-1 flex items-center justify-between">
+                        <span>Header</span>
+                        {pageSettings.showHeader && (
+                          <span className="text-[10px] text-emerald-400 font-normal">Active</span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => {
+                          const val = prompt('Enter Header Text:', pageSettings.headerText || documentTitle || '');
+                          if (val !== null) {
+                            onPageSettingsChange({
+                              ...pageSettings,
+                              showHeader: val.trim().length > 0,
+                              headerText: val
+                            });
+                          }
+                          setShowHeaderPicker(false);
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-xs hover:bg-[#0078d4] hover:text-white rounded flex flex-col"
+                      >
+                        <span className="font-medium">✏️ Edit / Custom Header...</span>
+                        <span className="text-[10px] text-gray-400">Type custom header text</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onPageSettingsChange({
+                            ...pageSettings,
+                            showHeader: true,
+                            headerText: documentTitle || 'Word AI Studio Document'
+                          });
+                          setShowHeaderPicker(false);
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-xs hover:bg-[#0078d4] hover:text-white rounded flex flex-col"
+                      >
+                        <span className="font-medium">📄 Document Title</span>
+                        <span className="text-[10px] text-gray-400">"{documentTitle || 'Document'}"</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onPageSettingsChange({
+                            ...pageSettings,
+                            showHeader: true,
+                            headerText: '21EE511 – ENGINEERING EXPLORATION V'
+                          });
+                          setShowHeaderPicker(false);
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-xs hover:bg-[#0078d4] hover:text-white rounded flex flex-col"
+                      >
+                        <span className="font-medium">🎓 Academic / Course Header</span>
+                        <span className="text-[10px] text-gray-400">21EE511 – ENGINEERING EXPLORATION V</span>
+                      </button>
+                      {pageSettings.showHeader && (
+                        <div className="border-t border-[#3e3e42] mt-1 pt-1">
+                          <button
+                            onClick={() => {
+                              onPageSettingsChange({
+                                ...pageSettings,
+                                showHeader: false,
+                                headerText: ''
+                              });
+                              setShowHeaderPicker(false);
+                            }}
+                            className="w-full text-left px-2 py-1.5 text-xs text-red-400 hover:bg-red-500/20 rounded font-medium"
+                          >
+                            🗑️ Remove Header
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      setShowFooterPicker(!showFooterPicker);
+                      setShowHeaderPicker(false);
+                      setShowPageNumPicker(false);
+                    }}
+                    className={`p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center group transition-colors ${
+                      pageSettings.showFooter ? 'text-teal-400 bg-[#2d3748]' : 'text-gray-200 hover:text-white'
+                    }`}
+                    title="Insert or customize page Footer"
+                  >
+                    <PanelBottom className="w-5 h-5 text-teal-400" />
+                    <span className="text-[10px] flex items-center gap-0.5">
+                      Footer <ChevronDown className="w-2.5 h-2.5 opacity-60" />
+                    </span>
+                  </button>
+                  {showFooterPicker && (
+                    <div className="absolute top-full left-0 mt-1 bg-[#252526] border border-[#3e3e42] shadow-2xl rounded p-2 z-50 w-64 text-gray-200">
+                      <div className="text-xs font-semibold px-2 py-1 border-b border-[#3e3e42] mb-1 flex items-center justify-between">
+                        <span>Footer</span>
+                        {pageSettings.showFooter && (
+                          <span className="text-[10px] text-emerald-400 font-normal">Active</span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => {
+                          const val = prompt('Enter Footer Text:', pageSettings.footerText || '');
+                          if (val !== null) {
+                            onPageSettingsChange({
+                              ...pageSettings,
+                              showFooter: val.trim().length > 0,
+                              footerText: val
+                            });
+                          }
+                          setShowFooterPicker(false);
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-xs hover:bg-[#0078d4] hover:text-white rounded flex flex-col"
+                      >
+                        <span className="font-medium">✏️ Edit / Custom Footer...</span>
+                        <span className="text-[10px] text-gray-400">Type custom footer text</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onPageSettingsChange({
+                            ...pageSettings,
+                            showFooter: true,
+                            footerText: 'SRI SHAKTHI INSTITUTE OF ENGINEERING AND TECHNOLOGY'
+                          });
+                          setShowFooterPicker(false);
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-xs hover:bg-[#0078d4] hover:text-white rounded flex flex-col"
+                      >
+                        <span className="font-medium">🏛️ Institute / College</span>
+                        <span className="text-[10px] text-gray-400">Sri Shakthi Inst. of Eng & Tech</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onPageSettingsChange({
+                            ...pageSettings,
+                            showFooter: true,
+                            footerText: 'ANNA UNIVERSITY: CHENNAI 600025'
+                          });
+                          setShowFooterPicker(false);
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-xs hover:bg-[#0078d4] hover:text-white rounded flex flex-col"
+                      >
+                        <span className="font-medium">🎓 University Affiliation</span>
+                        <span className="text-[10px] text-gray-400">ANNA UNIVERSITY: CHENNAI 600025</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onPageSettingsChange({
+                            ...pageSettings,
+                            showFooter: true,
+                            footerText: 'CONFIDENTIAL & PROPRIETARY'
+                          });
+                          setShowFooterPicker(false);
+                        }}
+                        className="w-full text-left px-2 py-1.5 text-xs hover:bg-[#0078d4] hover:text-white rounded flex flex-col"
+                      >
+                        <span className="font-medium">🔒 Confidentiality</span>
+                        <span className="text-[10px] text-gray-400">CONFIDENTIAL & PROPRIETARY</span>
+                      </button>
+                      {pageSettings.showFooter && (
+                        <div className="border-t border-[#3e3e42] mt-1 pt-1">
+                          <button
+                            onClick={() => {
+                              onPageSettingsChange({
+                                ...pageSettings,
+                                showFooter: false,
+                                footerText: ''
+                              });
+                              setShowFooterPicker(false);
+                            }}
+                            className="w-full text-left px-2 py-1.5 text-xs text-red-400 hover:bg-red-500/20 rounded font-medium"
+                          >
+                            🗑️ Remove Footer
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Page Number Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => {
+                      setShowPageNumPicker(!showPageNumPicker);
+                      setShowHeaderPicker(false);
+                      setShowFooterPicker(false);
+                    }}
+                    className={`p-1 px-2 hover:bg-[#333333] rounded flex flex-col items-center group transition-colors ${
+                      pageSettings.pageNumberPosition && pageSettings.pageNumberPosition !== 'none'
+                        ? 'text-indigo-400 bg-[#2d3748]'
+                        : 'text-gray-200 hover:text-white'
+                    }`}
+                    title="Insert Page Numbers"
+                  >
+                    <Hash className="w-5 h-5 text-indigo-400" />
+                    <span className="text-[10px] flex items-center gap-0.5">
+                      Page # <ChevronDown className="w-2.5 h-2.5 opacity-60" />
+                    </span>
+                  </button>
+                  {showPageNumPicker && (
+                    <div className="absolute top-full left-0 mt-1 bg-[#252526] border border-[#3e3e42] shadow-2xl rounded p-2 z-50 w-56 text-gray-200">
+                      <div className="text-xs font-semibold px-2 py-1 border-b border-[#3e3e42] mb-1 flex items-center justify-between">
+                        <span>Page Number</span>
+                        {pageSettings.pageNumberPosition && pageSettings.pageNumberPosition !== 'none' && (
+                          <span className="text-[10px] text-emerald-400 font-normal">Active</span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => {
+                          onPageSettingsChange({
+                            ...pageSettings,
+                            pageNumberPosition: 'bottom-right',
+                            showFooter: true
+                          });
+                          setShowPageNumPicker(false);
+                        }}
+                        className={`w-full text-left px-2 py-1.5 text-xs rounded flex items-center justify-between ${
+                          pageSettings.pageNumberPosition === 'bottom-right'
+                            ? 'bg-[#0078d4] text-white'
+                            : 'hover:bg-[#333333]'
+                        }`}
+                      >
+                        <span>Bottom of Page (Right)</span>
+                        <span className="text-[10px] opacity-75">Page 1</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onPageSettingsChange({
+                            ...pageSettings,
+                            pageNumberPosition: 'bottom-center',
+                            showFooter: true
+                          });
+                          setShowPageNumPicker(false);
+                        }}
+                        className={`w-full text-left px-2 py-1.5 text-xs rounded flex items-center justify-between ${
+                          pageSettings.pageNumberPosition === 'bottom-center'
+                            ? 'bg-[#0078d4] text-white'
+                            : 'hover:bg-[#333333]'
+                        }`}
+                      >
+                        <span>Bottom of Page (Center)</span>
+                        <span className="text-[10px] opacity-75">- 1 -</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          onPageSettingsChange({
+                            ...pageSettings,
+                            pageNumberPosition: 'top-right',
+                            showHeader: true
+                          });
+                          setShowPageNumPicker(false);
+                        }}
+                        className={`w-full text-left px-2 py-1.5 text-xs rounded flex items-center justify-between ${
+                          pageSettings.pageNumberPosition === 'top-right'
+                            ? 'bg-[#0078d4] text-white'
+                            : 'hover:bg-[#333333]'
+                        }`}
+                      >
+                        <span>Top of Page (Right)</span>
+                        <span className="text-[10px] opacity-75">Page 1</span>
+                      </button>
+                      {pageSettings.pageNumberPosition && pageSettings.pageNumberPosition !== 'none' && (
+                        <div className="border-t border-[#3e3e42] mt-1 pt-1">
+                          <button
+                            onClick={() => {
+                              onPageSettingsChange({
+                                ...pageSettings,
+                                pageNumberPosition: 'none'
+                              });
+                              setShowPageNumPicker(false);
+                            }}
+                            className="w-full text-left px-2 py-1.5 text-xs text-red-400 hover:bg-red-500/20 rounded font-medium"
+                          >
+                            🗑️ Remove Page Numbers
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <span className="text-[10px] text-gray-400 text-center font-normal">Header & Footer</span>
             </div>
 
             {/* Text Elements */}
