@@ -24,8 +24,9 @@ import type {
   DocumentSnapshot
 } from './types';
 import { DEFAULT_AI_SETTINGS } from './services/aiService';
-import { exportToDocx, exportToHtml, exportToMarkdown } from './utils/docxExport';
+import { exportToDocx, exportToHtml, exportToMarkdown, exportToTxt } from './utils/docxExport';
 import { importDocxFile } from './utils/docxImport';
+import { convertPdfToWordHtml } from './utils/pdfImport';
 
 export function App() {
   const [editor, setEditor] = useState<Editor | null>(null);
@@ -125,6 +126,11 @@ export function App() {
     exportToMarkdown(editor.getHTML(), documentTitle);
   }, [editor, documentTitle]);
 
+  const handleExportTxt = useCallback(() => {
+    if (!editor) return;
+    exportToTxt(editor.getHTML(), documentTitle);
+  }, [editor, documentTitle]);
+
   // Keyboard Shortcuts (Ctrl+K, Ctrl+S, Ctrl+P, Ctrl+F, Ctrl+H)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -159,15 +165,43 @@ export function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [editor, documentTitle, handleSaveDocx, handleExportPdf, isFocusMode]);
 
-  const handleImportDocx = async (file: File) => {
+  const handleImportFile = async (file: File) => {
     if (!editor) return;
+    const extension = file.name.split('.').pop()?.toLowerCase();
+
     try {
-      const html = await importDocxFile(file);
-      editor.commands.setContent(html);
-      setDocumentTitle(file.name.replace(/\.[^/.]+$/, ''));
-      createSnapshot(html, stats.words);
+      if (extension === 'pdf') {
+        // PDF to Word conversion: parses PDF pages, text, headings, tables
+        const result = await convertPdfToWordHtml(file);
+        editor.commands.setContent(result.html);
+        setDocumentTitle(result.title);
+        createSnapshot(result.html, stats.words);
+      } else if (extension === 'docx') {
+        const html = await importDocxFile(file);
+        editor.commands.setContent(html);
+        setDocumentTitle(file.name.replace(/\.[^/.]+$/, ''));
+        createSnapshot(html, stats.words);
+      } else if (extension === 'txt' || extension === 'md') {
+        const text = await file.text();
+        const paragraphs = text
+          .split(/\r?\n/)
+          .map((line) => (line.trim() ? `<p>${line}</p>` : '<p></p>'))
+          .join('');
+        editor.commands.setContent(paragraphs || '<p></p>');
+        setDocumentTitle(file.name.replace(/\.[^/.]+$/, ''));
+        createSnapshot(paragraphs, stats.words);
+      } else if (extension === 'html' || extension === 'htm') {
+        const html = await file.text();
+        editor.commands.setContent(html);
+        setDocumentTitle(file.name.replace(/\.[^/.]+$/, ''));
+        createSnapshot(html, stats.words);
+      } else {
+        const text = await file.text();
+        editor.commands.setContent(`<p>${text}</p>`);
+        setDocumentTitle(file.name.replace(/\.[^/.]+$/, ''));
+      }
     } catch (err: any) {
-      alert(`Could not import .docx file: ${err.message}`);
+      alert(`Could not open file: ${err.message}`);
     }
   };
 
@@ -271,7 +305,9 @@ export function App() {
           onExportPdf={handleExportPdf}
           onExportHtml={handleExportHtml}
           onExportMarkdown={handleExportMarkdown}
-          onImportDocx={handleImportDocx}
+          onExportTxt={handleExportTxt}
+          onImportDocx={handleImportFile}
+          onImportFile={handleImportFile}
           onNewDocument={handleNewDocument}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onToggleCopilot={() => setIsCopilotOpen(!isCopilotOpen)}

@@ -255,3 +255,11 @@ export function exportToMarkdown(htmlContent: string, fileName: string = 'docume
   const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
   saveAs(blob, fileName.endsWith('.md') ? fileName : `${fileName}.md`);
 }
+
+export function exportToTxt(htmlContent: string, fileName: string = 'document.txt') {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, 'text/html');
+  const text = doc.body.textContent || '';
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  saveAs(blob, fileName.endsWith('.txt') ? fileName : `${fileName}.txt`);
+}
